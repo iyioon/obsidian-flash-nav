@@ -69,6 +69,22 @@ Notes:
 - GitHub issues: https://github.com/iyioon/obsidian-flash-nav/issues
 - GitHub milestones: https://github.com/iyioon/obsidian-flash-nav/milestones
 
+## Performance Profiling (Dev)
+
+To enable compute profiling logs in the developer console:
+
+```js
+globalThis.__FLASH_NAV_PROFILE__ = true
+```
+
+Disable it with:
+
+```js
+globalThis.__FLASH_NAV_PROFILE__ = false
+```
+
+When enabled, slow refresh cycles (>= 8ms) are logged with pattern length, match count, scope, and direction.
+
 ## Contributing
 
 When opening a PR:

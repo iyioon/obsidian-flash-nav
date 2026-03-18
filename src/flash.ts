@@ -27,6 +27,7 @@ const recentVisualSelectionByView = new WeakMap<EditorView, {
   ts: number;
 }>();
 const VISUAL_SELECTION_REUSE_MS = 1500;
+const PROFILE_LOG_THRESHOLD_MS = 8;
 
 type FlashMatch = {
   from: number;
@@ -58,9 +59,37 @@ type ReplaceStatePayload = {
   targetIndex: number;
 };
 
+type ProfileEvent = {
+  durationMs: number;
+  patternLen: number;
+  matchCount: number;
+  changed: boolean;
+  scope: FlashNavSettings["searchScope"];
+  direction: FlashNavSettings["searchDirection"];
+};
+
 const startFlashEffect = StateEffect.define<{ visualAnchor: number | null }>();
 const stopFlashEffect = StateEffect.define<void>();
 const replaceFlashStateEffect = StateEffect.define<ReplaceStatePayload>();
+
+function isProfilingEnabled(): boolean {
+  const flag = (globalThis as { __FLASH_NAV_PROFILE__?: unknown }).__FLASH_NAV_PROFILE__;
+  return flag === true || flag === "1" || flag === 1;
+}
+
+function logProfile(event: ProfileEvent): void {
+  if (!isProfilingEnabled()) {
+    return;
+  }
+  if (event.durationMs < PROFILE_LOG_THRESHOLD_MS) {
+    return;
+  }
+
+  const rounded = Math.round(event.durationMs * 100) / 100;
+  console.debug(
+    `[flash-nav][profile] compute=${rounded}ms patternLen=${event.patternLen} matches=${event.matchCount} changed=${event.changed} scope=${event.scope} direction=${event.direction}`
+  );
+}
 
 const flashStateField = StateField.define<FlashState>({
   create() {
@@ -204,6 +233,7 @@ function computeNextState(view: EditorView, pattern: string): ReplaceStatePayloa
 }
 
 function refreshState(view: EditorView, pattern: string): void {
+  const startTime = performance.now();
   const current = view.state.field(flashStateField);
   const next = computeNextState(view, pattern);
 
@@ -220,6 +250,17 @@ function refreshState(view: EditorView, pattern: string): void {
         && match.labelFrom === other.labelFrom
         && match.labelTo === other.labelTo;
     });
+
+  const durationMs = performance.now() - startTime;
+
+  logProfile({
+    durationMs,
+    patternLen: pattern.length,
+    matchCount: next.matches.length,
+    changed: !isSameState,
+    scope: activeSettings.searchScope,
+    direction: activeSettings.searchDirection
+  });
 
   if (isSameState) {
     return;
