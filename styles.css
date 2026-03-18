@@ -8,7 +8,7 @@
 }
 
 .cm-editor.flash-nav-active .cm-line {
-  opacity: 0.52;
+  opacity: var(--flash-nav-backdrop-opacity, 0.52);
   transition: opacity 90ms ease;
 }
 

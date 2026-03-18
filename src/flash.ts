@@ -6,8 +6,15 @@ import {
   type ViewUpdate,
   WidgetType
 } from "@codemirror/view";
+import type { FlashNavSettings } from "./settings";
 
-const DEFAULT_LABELS = "asdfghjklqwertyuiopzxcvbnm";
+let activeSettings: FlashNavSettings = {
+  labelAlphabet: "asdfghjklqwertyuiopzxcvbnm",
+  caseSensitive: false,
+  smartCase: true,
+  autoJumpSingleMatch: false,
+  backdropOpacity: 52
+};
 
 type FlashMatch = {
   from: number;
@@ -161,12 +168,16 @@ function findVisibleMatches(view: EditorView, pattern: string): FlashMatch[] {
     return [];
   }
 
-  const query = pattern.toLowerCase();
+  const shouldUseCaseSensitive =
+    activeSettings.caseSensitive ||
+    (!activeSettings.caseSensitive && activeSettings.smartCase && /[A-Z]/.test(pattern));
+
+  const query = shouldUseCaseSensitive ? pattern : pattern.toLowerCase();
   const matches: FlashMatch[] = [];
 
   for (const range of view.visibleRanges) {
     const text = view.state.doc.sliceString(range.from, range.to);
-    const haystack = text.toLowerCase();
+    const haystack = shouldUseCaseSensitive ? text : text.toLowerCase();
 
     let index = haystack.indexOf(query);
     while (index !== -1) {
@@ -200,10 +211,14 @@ function assignLabels(view: EditorView, matches: FlashMatch[]): FlashMatch[] {
     }
   }
 
-  const filteredLabels = DEFAULT_LABELS
+  const labels = activeSettings.labelAlphabet.trim().length > 0
+    ? activeSettings.labelAlphabet
+    : "asdfghjklqwertyuiopzxcvbnm";
+
+  const filteredLabels = labels
     .split("")
     .filter((label) => !continuationChars.has(label.toLowerCase()));
-  const availableLabels = filteredLabels.length > 0 ? filteredLabels : DEFAULT_LABELS.split("");
+  const availableLabels = filteredLabels.length > 0 ? filteredLabels : labels.split("");
 
   for (let i = 0; i < sorted.length; i += 1) {
     const match = sorted[i];
@@ -222,6 +237,19 @@ function assignLabels(view: EditorView, matches: FlashMatch[]): FlashMatch[] {
 function computeNextState(view: EditorView, pattern: string): ReplaceStatePayload {
   const visibleMatches = findVisibleMatches(view, pattern);
   const matches = assignLabels(view, visibleMatches);
+
+  if (activeSettings.autoJumpSingleMatch && matches.length === 1) {
+    queueMicrotask(() => {
+      const state = view.state.field(flashStateField);
+      if (!state.active || state.pattern !== pattern) {
+        return;
+      }
+      const single = state.matches[0];
+      if (single) {
+        jumpToMatch(view, single);
+      }
+    });
+  }
 
   return {
     pattern,
@@ -368,4 +396,8 @@ export function startFlash(view: EditorView): void {
     view.dispatch({ effects: startFlashEffect.of(undefined) });
   }
   refreshState(view, "");
+}
+
+export function setFlashSettings(settings: FlashNavSettings): void {
+  activeSettings = settings;
 }

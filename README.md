@@ -25,6 +25,16 @@ Every milestone in this repo is expected to follow the Obsidian guides above.
 - Vim integration path:
   - Bind command `Flash Nav: Start jump` to `s` in Obsidian hotkeys/Vimrc workflow
 
+## Settings
+
+Open Settings -> Community plugins -> Obsidian Flash Nav to configure:
+
+- Label alphabet
+- Case sensitive matching
+- Smart case matching
+- Auto jump when a single match remains
+- Backdrop dim opacity
+
 ## Development setup (from Obsidian build guide)
 
 1. Clone this repo.
@@ -63,6 +73,8 @@ Notes:
 - If `s` is already used by another Vim mapping/plugin, keep `nunmap s`.
 - You can map a different key if preferred, e.g. `nmap <leader>s :flash<CR>`.
 - Reload Vimrc plugin or restart Obsidian after editing `.obsidian.vimrc`.
+- `obcommand` comes from `obsidian-vimrc-support` and can break on plugin/internal changes; fallback is binding `Flash Nav: Start jump` directly in Obsidian Hotkeys.
+- You can run `:obcommand` in normal mode to inspect currently available command ids.
 
 Use a dedicated development vault as recommended by Obsidian docs.
 
