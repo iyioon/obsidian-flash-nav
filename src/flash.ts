@@ -16,6 +16,8 @@ let activeSettings: FlashNavSettings = {
   backdropOpacity: 52
 };
 
+const reusedLabelsByPos = new Map<number, string>();
+
 type FlashMatch = {
   from: number;
   to: number;
@@ -79,6 +81,7 @@ const flashStateField = StateField.define<FlashState>({
 
     for (const effect of tr.effects) {
       if (effect.is(startFlashEffect)) {
+        reusedLabelsByPos.clear();
         next = {
           active: true,
           pattern: "",
@@ -86,6 +89,7 @@ const flashStateField = StateField.define<FlashState>({
           targetIndex: -1
         };
       } else if (effect.is(stopFlashEffect)) {
+        reusedLabelsByPos.clear();
         next = INACTIVE_STATE;
       } else if (effect.is(replaceFlashStateEffect)) {
         next = {
@@ -194,12 +198,39 @@ function assignLabels(view: EditorView, matches: FlashMatch[]): FlashMatch[] {
 
   for (let i = 0; i < sorted.length; i += 1) {
     const match = sorted[i];
-    const label = availableLabels[i];
+    if (!match) {
+      continue;
+    }
+
+    const reused = reusedLabelsByPos.get(match.from);
+    if (!reused) {
+      continue;
+    }
+
+    const reusedIndex = availableLabels.indexOf(reused);
+    if (reusedIndex === -1) {
+      continue;
+    }
+
+    sorted[i] = {
+      ...match,
+      label: reused
+    };
+    availableLabels.splice(reusedIndex, 1);
+  }
+
+  for (let i = 0; i < sorted.length; i += 1) {
+    const match = sorted[i];
+    if (match?.label) {
+      continue;
+    }
+    const label = availableLabels.shift();
     if (match && label) {
       sorted[i] = {
         ...match,
         label
       };
+      reusedLabelsByPos.set(match.from, label);
     }
   }
 
