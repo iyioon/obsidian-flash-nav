@@ -12,7 +12,7 @@ Describe the task.
 
 ## Milestone link
 
-Reference the exact checkbox from `docs/MILESTONES.md`.
+Reference the related GitHub milestone.
 
 ## Obsidian docs consulted
 

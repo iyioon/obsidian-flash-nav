@@ -14,6 +14,8 @@ All notable changes to this project will be documented in this file.
 - Label reuse controls (`none`, `lowercase`, `all`) and current-label toggle.
 - Search direction controls (`closest`, `forward`, `backward`).
 - Search scope controls (`viewport`, `line`, `document`).
+- Extracted pure flash core logic into `src/flash-core.ts` for testability.
+- Added unit tests in `tests/flash-core.test.ts` and `npm run test` workflow.
 
 ### Changed
 

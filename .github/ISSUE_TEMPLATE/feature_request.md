@@ -12,7 +12,7 @@ Describe the feature and user value.
 
 ## Milestone
 
-Which milestone in `docs/MILESTONES.md` does this belong to?
+Which GitHub milestone does this belong to?
 
 ## Obsidian guide references
 

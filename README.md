@@ -26,6 +26,7 @@ https://docs.obsidian.md/Plugins/Getting+started/Build+a+plugin
 1. Clone this repository.
 2. Run `npm install`.
 3. Run `npm run dev` (watch mode) or `npm run build`.
+   - Run `npm run test` for matcher/labeler unit checks.
 4. Copy this repo into your vault plugin folder:
    - `<Vault>/.obsidian/plugins/obsidian-flash-nav/`
 5. In Obsidian, enable Community plugins and turn on `Obsidian Flash Nav`.
@@ -54,8 +55,8 @@ Notes:
 
 ## Roadmap
 
-- Detailed plan: `docs/MILESTONES.md`
-- Seed issue list: `docs/ISSUES.md`
+- GitHub issues: https://github.com/iyioon/obsidian-flash-nav/issues
+- GitHub milestones: https://github.com/iyioon/obsidian-flash-nav/milestones
 
 ## Contributing
 

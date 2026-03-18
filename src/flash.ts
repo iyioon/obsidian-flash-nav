@@ -6,6 +6,7 @@ import {
   type ViewUpdate
 } from "@codemirror/view";
 import type { FlashNavSettings } from "./settings";
+import { applyLabelPlacementCore, assignLabelsCore, findMatchesCore } from "./flash-core";
 
 let activeSettings: FlashNavSettings = {
   labelAlphabet: "asdfghjklqwertyuiopzxcvbnm",
@@ -129,180 +130,35 @@ function isPrintableKey(event: KeyboardEvent): boolean {
   return event.key.length === 1 && !event.ctrlKey && !event.metaKey;
 }
 
-function findVisibleMatches(view: EditorView, pattern: string): FlashMatch[] {
-  if (pattern.length === 0) {
-    return [];
-  }
-
-  const shouldUseCaseSensitive =
-    activeSettings.caseSensitive ||
-    (!activeSettings.caseSensitive && activeSettings.smartCase && /[A-Z]/.test(pattern));
-
-  const query = shouldUseCaseSensitive ? pattern : pattern.toLowerCase();
-  const matches: FlashMatch[] = [];
-  const cursorPos = view.state.selection.main.head;
-
-  const searchRanges = (() => {
-    if (activeSettings.searchScope === "document") {
-      return [{ from: 0, to: view.state.doc.length }];
-    }
-
-    if (activeSettings.searchScope === "line") {
-      const line = view.state.doc.lineAt(cursorPos);
-      return [{ from: line.from, to: line.to }];
-    }
-
-    return view.visibleRanges;
-  })();
-
-  for (const range of searchRanges) {
-    const text = view.state.doc.sliceString(range.from, range.to);
-    const haystack = shouldUseCaseSensitive ? text : text.toLowerCase();
-
-    let index = haystack.indexOf(query);
-    while (index !== -1) {
-      const from = range.from + index;
-      const to = from + pattern.length;
-
-      if (activeSettings.searchDirection === "forward" && from < cursorPos) {
-        index = haystack.indexOf(query, index + 1);
-        continue;
-      }
-
-      if (activeSettings.searchDirection === "backward" && from > cursorPos) {
-        index = haystack.indexOf(query, index + 1);
-        continue;
-      }
-
-      matches.push({ from, to });
-      index = haystack.indexOf(query, index + 1);
-    }
-  }
-
-  return matches;
+function findMatches(view: EditorView, pattern: string): FlashMatch[] {
+  return findMatchesCore({
+    doc: view.state.doc.toString(),
+    pattern,
+    cursorPos: view.state.selection.main.head,
+    visibleRanges: view.visibleRanges,
+    searchScope: activeSettings.searchScope,
+    searchDirection: activeSettings.searchDirection,
+    caseSensitive: activeSettings.caseSensitive,
+    smartCase: activeSettings.smartCase
+  });
 }
 
-function assignLabels(view: EditorView, matches: FlashMatch[]): FlashMatch[] {
-  const cursorPos = view.state.selection.main.head;
-
-  const sorted = [...matches].sort((a, b) => {
-    if (activeSettings.searchDirection === "forward") {
-      return a.from - b.from;
-    }
-
-    if (activeSettings.searchDirection === "backward") {
-      return b.from - a.from;
-    }
-
-    const da = Math.abs(a.from - cursorPos);
-    const db = Math.abs(b.from - cursorPos);
-    if (da !== db) {
-      return da - db;
-    }
-    return a.from - b.from;
+function assignLabelsForView(view: EditorView, matches: FlashMatch[]): FlashMatch[] {
+  return assignLabelsCore({
+    doc: view.state.doc.toString(),
+    matches,
+    cursorPos: view.state.selection.main.head,
+    labelAlphabet: activeSettings.labelAlphabet,
+    labelReuseMode: activeSettings.labelReuseMode,
+    labelCurrentMatch: activeSettings.labelCurrentMatch,
+    searchDirection: activeSettings.searchDirection,
+    reusedLabelsByPos
   });
-
-  const continuationChars = new Set<string>();
-  for (const match of sorted) {
-    const nextChar = view.state.doc.sliceString(match.to, match.to + 1).toLowerCase();
-    if (nextChar.length === 1) {
-      continuationChars.add(nextChar);
-    }
-  }
-
-  const labels = activeSettings.labelAlphabet.trim().length > 0
-    ? activeSettings.labelAlphabet
-    : "asdfghjklqwertyuiopzxcvbnm";
-
-  const filteredLabels = labels
-    .split("")
-    .filter((label) => !continuationChars.has(label.toLowerCase()));
-  const availableLabels = filteredLabels.length > 0 ? filteredLabels : labels.split("");
-
-  const canReuseLabel = (label: string): boolean => {
-    if (activeSettings.labelReuseMode === "none") {
-      return false;
-    }
-    if (activeSettings.labelReuseMode === "all") {
-      return true;
-    }
-    return label.toLowerCase() === label;
-  };
-
-  for (let i = 0; i < sorted.length; i += 1) {
-    const match = sorted[i];
-    const isCurrent = i === 0;
-    if (!match) {
-      continue;
-    }
-
-    if (!activeSettings.labelCurrentMatch && isCurrent) {
-      continue;
-    }
-
-    if (activeSettings.labelReuseMode === "none") {
-      continue;
-    }
-
-    const reused = reusedLabelsByPos.get(match.from);
-    if (!reused) {
-      continue;
-    }
-
-    const reusedIndex = availableLabels.indexOf(reused);
-    if (reusedIndex === -1) {
-      continue;
-    }
-
-    sorted[i] = {
-      ...match,
-      label: reused
-    };
-    availableLabels.splice(reusedIndex, 1);
-  }
-
-  for (let i = 0; i < sorted.length; i += 1) {
-    const match = sorted[i];
-    const isCurrent = i === 0;
-    if (!activeSettings.labelCurrentMatch && isCurrent) {
-      continue;
-    }
-    if (match?.label) {
-      continue;
-    }
-    const label = availableLabels.shift();
-    if (match && label) {
-      sorted[i] = {
-        ...match,
-        label
-      };
-      if (canReuseLabel(label)) {
-        reusedLabelsByPos.set(match.from, label);
-      }
-    }
-  }
-
-  return sorted;
 }
 
 function computeNextState(view: EditorView, pattern: string): ReplaceStatePayload {
-  const visibleMatches = findVisibleMatches(view, pattern);
-  const matches = assignLabels(view, visibleMatches).map((match) => {
-    if (!match.label) {
-      return match;
-    }
-
-    const line = view.state.doc.lineAt(match.to);
-    const canUseNextChar = match.to < line.to;
-    const labelFrom = canUseNextChar ? match.to : Math.max(match.from, match.to - 1);
-    const labelTo = canUseNextChar ? Math.min(match.to + 1, line.to) : match.to;
-
-    return {
-      ...match,
-      labelFrom,
-      labelTo
-    };
-  });
+  const matchesInScope = findMatches(view, pattern);
+  const matches = applyLabelPlacementCore(view.state.doc.toString(), assignLabelsForView(view, matchesInScope));
 
   if (activeSettings.autoJumpSingleMatch && matches.length === 1) {
     queueMicrotask(() => {
