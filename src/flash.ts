@@ -99,6 +99,12 @@ const flashStateField = StateField.define<FlashState>({
       }
 
       const builder = new RangeSetBuilder<Decoration>();
+      const ranges: Array<{
+        from: number;
+        to: number;
+        startSide: number;
+        decoration: Decoration;
+      }> = [];
 
       for (let i = 0; i < state.matches.length; i += 1) {
         const match = state.matches[i];
@@ -108,18 +114,38 @@ const flashStateField = StateField.define<FlashState>({
         const isCurrent = i === state.targetIndex;
         const markClass = isCurrent ? "flash-nav-match flash-nav-match-current" : "flash-nav-match";
 
-        builder.add(match.from, match.to, Decoration.mark({ class: markClass }));
+        ranges.push({
+          from: match.from,
+          to: match.to,
+          startSide: 0,
+          decoration: Decoration.mark({ class: markClass })
+        });
 
         if (match.label) {
-          builder.add(
-            match.to,
-            match.to,
-            Decoration.widget({
+          ranges.push({
+            from: match.to,
+            to: match.to,
+            startSide: 1,
+            decoration: Decoration.widget({
               widget: new LabelWidget(match.label, isCurrent),
               side: 1
             })
-          );
+          });
         }
+      }
+
+      ranges.sort((a, b) => {
+        if (a.from !== b.from) {
+          return a.from - b.from;
+        }
+        if (a.startSide !== b.startSide) {
+          return a.startSide - b.startSide;
+        }
+        return a.to - b.to;
+      });
+
+      for (const range of ranges) {
+        builder.add(range.from, range.to, range.decoration);
       }
 
       return builder.finish();
