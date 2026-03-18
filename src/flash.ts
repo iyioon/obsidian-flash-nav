@@ -21,6 +21,12 @@ let activeSettings: FlashNavSettings = {
 };
 
 const reusedLabelsByPos = new Map<number, string>();
+const recentVisualSelectionByView = new WeakMap<EditorView, {
+  anchor: number;
+  head: number;
+  ts: number;
+}>();
+const VISUAL_SELECTION_REUSE_MS = 1500;
 
 type FlashMatch = {
   from: number;
@@ -35,13 +41,15 @@ type FlashState = {
   pattern: string;
   matches: FlashMatch[];
   targetIndex: number;
+  visualAnchor: number | null;
 };
 
 const INACTIVE_STATE: FlashState = {
   active: false,
   pattern: "",
   matches: [],
-  targetIndex: -1
+  targetIndex: -1,
+  visualAnchor: null
 };
 
 type ReplaceStatePayload = {
@@ -50,7 +58,7 @@ type ReplaceStatePayload = {
   targetIndex: number;
 };
 
-const startFlashEffect = StateEffect.define<void>();
+const startFlashEffect = StateEffect.define<{ visualAnchor: number | null }>();
 const stopFlashEffect = StateEffect.define<void>();
 const replaceFlashStateEffect = StateEffect.define<ReplaceStatePayload>();
 
@@ -68,7 +76,8 @@ const flashStateField = StateField.define<FlashState>({
           active: true,
           pattern: "",
           matches: [],
-          targetIndex: -1
+          targetIndex: -1,
+          visualAnchor: effect.value.visualAnchor
         };
       } else if (effect.is(stopFlashEffect)) {
         reusedLabelsByPos.clear();
@@ -78,7 +87,8 @@ const flashStateField = StateField.define<FlashState>({
           active: true,
           pattern: effect.value.pattern,
           matches: effect.value.matches,
-          targetIndex: effect.value.targetIndex
+          targetIndex: effect.value.targetIndex,
+          visualAnchor: value.visualAnchor
         };
       }
     }
@@ -168,7 +178,7 @@ function computeNextState(view: EditorView, pattern: string): ReplaceStatePayloa
       }
       const single = state.matches[0];
       if (single) {
-        jumpToMatch(view, single);
+        jumpToMatch(view, single, state.visualAnchor);
       }
     });
   }
@@ -186,9 +196,22 @@ function refreshState(view: EditorView, pattern: string): void {
   });
 }
 
-function jumpToMatch(view: EditorView, match: FlashMatch): void {
+function jumpToMatch(view: EditorView, match: FlashMatch, visualAnchor: number | null): void {
+  const selection = (() => {
+    if (visualAnchor === null) {
+      return { anchor: match.from };
+    }
+
+    const movingForward = match.from >= visualAnchor;
+    const inclusiveHead = movingForward
+      ? Math.min(match.from + 1, view.state.doc.length)
+      : match.from;
+
+    return { anchor: visualAnchor, head: inclusiveHead };
+  })();
+
   view.dispatch({
-    selection: { anchor: match.from },
+    selection,
     scrollIntoView: true,
     effects: stopFlashEffect.of(undefined)
   });
@@ -221,7 +244,7 @@ function handleFlashKeydown(event: KeyboardEvent, view: EditorView): boolean {
     event.preventDefault();
     const target = state.targetIndex >= 0 ? state.matches[state.targetIndex] : undefined;
     if (target) {
-      jumpToMatch(view, target);
+      jumpToMatch(view, target, state.visualAnchor);
     } else {
       view.dispatch({ effects: stopFlashEffect.of(undefined) });
     }
@@ -232,7 +255,7 @@ function handleFlashKeydown(event: KeyboardEvent, view: EditorView): boolean {
   const byLabel = state.matches.find((match) => match.label === key);
   if (byLabel) {
     event.preventDefault();
-    jumpToMatch(view, byLabel);
+    jumpToMatch(view, byLabel, state.visualAnchor);
     return true;
   }
 
@@ -289,6 +312,18 @@ const flashViewPlugin = ViewPlugin.fromClass(
     update(update: ViewUpdate): void {
       const state = update.state.field(flashStateField);
       this.syncActiveClass();
+
+      if (update.selectionSet) {
+        const main = update.state.selection.main;
+        if (!main.empty) {
+          recentVisualSelectionByView.set(this.view, {
+            anchor: main.anchor,
+            head: main.head,
+            ts: Date.now()
+          });
+        }
+      }
+
       if (!state.active) {
         return;
       }
@@ -313,9 +348,26 @@ export const flashExtension = [flashStateField, flashViewPlugin];
 
 export function startFlash(view: EditorView): void {
   view.focus();
+
+  const range = view.state.selection.main;
+  let visualAnchor = range.empty ? null : range.anchor;
+
+  if (visualAnchor === null) {
+    const recent = recentVisualSelectionByView.get(view);
+    if (recent) {
+      const now = Date.now();
+      const isFresh = now - recent.ts <= VISUAL_SELECTION_REUSE_MS;
+      const cursor = range.head;
+      const isRelated = cursor === recent.anchor || cursor === recent.head;
+      if (isFresh && isRelated) {
+        visualAnchor = recent.anchor;
+      }
+    }
+  }
+
   const state = view.state.field(flashStateField);
   if (!state.active) {
-    view.dispatch({ effects: startFlashEffect.of(undefined) });
+    view.dispatch({ effects: startFlashEffect.of({ visualAnchor }) });
   }
   refreshState(view, "");
 }

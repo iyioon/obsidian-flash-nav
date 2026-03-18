@@ -46,18 +46,21 @@ If you use `obsidian-vimrc-support`, add this to your vault root `.obsidian.vimr
 ```vim
 " Optional: release default 's' behavior
 nunmap s
+vunmap s
 
 " Alias Obsidian command id to a short ex command
 exmap flash obcommand obsidian-flash-nav:flash-nav-start
 
-" Map normal mode s to flash
+" Map normal mode and visual mode s to flash
 nmap s :flash<CR>
+vmap s :flash<CR>
 ```
 
 Notes:
 
 - Command id is `obsidian-flash-nav:flash-nav-start`.
 - `<CR>` is required for ex command mappings in recent codemirror-vim versions.
+- Visual mode requires `vmap s :flash<CR>`; without it, Vim keeps default visual substitute behavior.
 - `obcommand` is provided by `obsidian-vimrc-support` and may change; fallback is direct Obsidian hotkey binding.
 - Run `:obcommand` to inspect available command ids.
 
