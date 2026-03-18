@@ -5,6 +5,8 @@ export interface FlashNavSettings {
   labelAlphabet: string;
   labelReuseMode: "none" | "lowercase" | "all";
   labelCurrentMatch: boolean;
+  searchDirection: "closest" | "forward" | "backward";
+  searchScope: "viewport" | "line" | "document";
   caseSensitive: boolean;
   smartCase: boolean;
   autoJumpSingleMatch: boolean;
@@ -15,6 +17,8 @@ export const DEFAULT_SETTINGS: FlashNavSettings = {
   labelAlphabet: "asdfghjklqwertyuiopzxcvbnm",
   labelReuseMode: "lowercase",
   labelCurrentMatch: true,
+  searchDirection: "closest",
+  searchScope: "viewport",
   caseSensitive: false,
   smartCase: true,
   autoJumpSingleMatch: false,
@@ -50,6 +54,12 @@ export function normalizeSettings(raw: unknown): FlashNavSettings {
     merged.labelReuseMode = DEFAULT_SETTINGS.labelReuseMode;
   }
   merged.labelCurrentMatch = Boolean(merged.labelCurrentMatch);
+  if (!["closest", "forward", "backward"].includes(String(merged.searchDirection))) {
+    merged.searchDirection = DEFAULT_SETTINGS.searchDirection;
+  }
+  if (!["viewport", "line", "document"].includes(String(merged.searchScope))) {
+    merged.searchScope = DEFAULT_SETTINGS.searchScope;
+  }
   merged.backdropOpacity = Math.max(0, Math.min(90, Number(merged.backdropOpacity ?? DEFAULT_SETTINGS.backdropOpacity)));
 
   return merged;
@@ -100,6 +110,34 @@ export class FlashNavSettingTab extends PluginSettingTab {
         toggle.setValue(this.plugin.settings.labelCurrentMatch).onChange(async (value) => {
           await this.plugin.updateSettings({ labelCurrentMatch: value });
         });
+      });
+
+    new Setting(containerEl)
+      .setName("Search direction")
+      .setDesc("Choose how matches are prioritized relative to cursor position.")
+      .addDropdown((dropdown) => {
+        dropdown
+          .addOption("closest", "Closest")
+          .addOption("forward", "Forward")
+          .addOption("backward", "Backward")
+          .setValue(this.plugin.settings.searchDirection)
+          .onChange(async (value) => {
+            await this.plugin.updateSettings({ searchDirection: value as FlashNavSettings["searchDirection"] });
+          });
+      });
+
+    new Setting(containerEl)
+      .setName("Search scope")
+      .setDesc("Limit search to viewport, current line, or full document.")
+      .addDropdown((dropdown) => {
+        dropdown
+          .addOption("viewport", "Viewport")
+          .addOption("line", "Current line")
+          .addOption("document", "Whole document")
+          .setValue(this.plugin.settings.searchScope)
+          .onChange(async (value) => {
+            await this.plugin.updateSettings({ searchScope: value as FlashNavSettings["searchScope"] });
+          });
       });
 
     new Setting(containerEl)

@@ -12,6 +12,8 @@ let activeSettings: FlashNavSettings = {
   labelAlphabet: "asdfghjklqwertyuiopzxcvbnm",
   labelReuseMode: "lowercase",
   labelCurrentMatch: true,
+  searchDirection: "closest",
+  searchScope: "viewport",
   caseSensitive: false,
   smartCase: true,
   autoJumpSingleMatch: false,
@@ -157,8 +159,22 @@ function findVisibleMatches(view: EditorView, pattern: string): FlashMatch[] {
 
   const query = shouldUseCaseSensitive ? pattern : pattern.toLowerCase();
   const matches: FlashMatch[] = [];
+  const cursorPos = view.state.selection.main.head;
 
-  for (const range of view.visibleRanges) {
+  const searchRanges = (() => {
+    if (activeSettings.searchScope === "document") {
+      return [{ from: 0, to: view.state.doc.length }];
+    }
+
+    if (activeSettings.searchScope === "line") {
+      const line = view.state.doc.lineAt(cursorPos);
+      return [{ from: line.from, to: line.to }];
+    }
+
+    return view.visibleRanges;
+  })();
+
+  for (const range of searchRanges) {
     const text = view.state.doc.sliceString(range.from, range.to);
     const haystack = shouldUseCaseSensitive ? text : text.toLowerCase();
 
@@ -166,6 +182,17 @@ function findVisibleMatches(view: EditorView, pattern: string): FlashMatch[] {
     while (index !== -1) {
       const from = range.from + index;
       const to = from + pattern.length;
+
+      if (activeSettings.searchDirection === "forward" && from < cursorPos) {
+        index = haystack.indexOf(query, index + 1);
+        continue;
+      }
+
+      if (activeSettings.searchDirection === "backward" && from > cursorPos) {
+        index = haystack.indexOf(query, index + 1);
+        continue;
+      }
+
       matches.push({ from, to });
       index = haystack.indexOf(query, index + 1);
     }
@@ -178,6 +205,14 @@ function assignLabels(view: EditorView, matches: FlashMatch[]): FlashMatch[] {
   const cursorPos = view.state.selection.main.head;
 
   const sorted = [...matches].sort((a, b) => {
+    if (activeSettings.searchDirection === "forward") {
+      return a.from - b.from;
+    }
+
+    if (activeSettings.searchDirection === "backward") {
+      return b.from - a.from;
+    }
+
     const da = Math.abs(a.from - cursorPos);
     const db = Math.abs(b.from - cursorPos);
     if (da !== db) {
@@ -437,7 +472,9 @@ export function setFlashSettings(settings: FlashNavSettings): void {
   const shouldResetReuse =
     activeSettings.labelAlphabet !== settings.labelAlphabet
     || activeSettings.labelReuseMode !== settings.labelReuseMode
-    || activeSettings.labelCurrentMatch !== settings.labelCurrentMatch;
+    || activeSettings.labelCurrentMatch !== settings.labelCurrentMatch
+    || activeSettings.searchDirection !== settings.searchDirection
+    || activeSettings.searchScope !== settings.searchScope;
 
   activeSettings = settings;
 

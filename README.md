@@ -12,6 +12,8 @@ Flash-style label navigation for Obsidian, inspired by `folke/flash.nvim` and bu
   - label alphabet
   - label reuse mode (none/lowercase/all)
   - label current match toggle
+  - search direction (closest/forward/backward)
+  - search scope (viewport/current line/document)
   - case sensitive and smart-case matching
   - auto-jump on single match
   - backdrop dim opacity
