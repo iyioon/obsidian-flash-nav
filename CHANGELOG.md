@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - Search scope controls (`viewport`, `line`, `document`).
 - Extracted pure flash core logic into `src/flash-core.ts` for testability.
 - Added unit tests in `tests/flash-core.test.ts` and `npm run test` workflow.
+- Added GitHub Actions release workflow for tag-based test/build/publish.
 
 ### Changed
 
@@ -26,6 +27,7 @@ All notable changes to this project will be documented in this file.
 - Flash now preserves visual-mode anchor to allow selection extension on jump.
 - Reduced redundant refresh dispatches by skipping unchanged flash state updates.
 - Added optional dev profiling logs for slow flash recompute cycles.
+- Renamed plugin display name to `Flash Navigator` and simplified command name to `Start jump`.
 
 ### Fixed
 

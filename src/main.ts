@@ -78,7 +78,7 @@ export default class ObsidianFlashNavPlugin extends Plugin {
 
     this.addCommand({
       id: "flash-nav-start",
-      name: "Flash Nav: Start jump",
+      name: "Start jump",
       editorCallback: (editor: Editor, _view: MarkdownView) => {
         const cm = (editor as Editor & { cm?: EditorView }).cm ?? this.resolveActiveEditorView();
         if (!cm) {
