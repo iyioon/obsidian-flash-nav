@@ -1,0 +1,23 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [0.1.0] - 2026-03-18
+
+### Added
+
+- Initial Obsidian plugin scaffold with build pipeline.
+- Flash jump command and viewport-based pattern matching.
+- Label rendering and jump-by-label workflow.
+- Vim mapping documentation for `.obsidian.vimrc`.
+- Settings for label alphabet, case sensitivity, smart-case, auto-jump, and backdrop opacity.
+
+### Changed
+
+- Hardened key capture behavior for Vim normal-mode usage.
+- Improved active-mode visual feedback.
+
+### Fixed
+
+- Prevented CM6 re-entrant update dispatch errors.
+- Fixed decoration ordering errors in range builder.

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Obsidian plugin docs
+    url: https://docs.obsidian.md/Plugins/Getting+started/Build+a+plugin
+    about: Review official plugin development documentation.
