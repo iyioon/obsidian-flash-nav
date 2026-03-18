@@ -1,0 +1,10 @@
+{
+  "id": "obsidian-flash-nav",
+  "name": "Obsidian Flash Nav",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Flash-style label-based navigation for Obsidian editor with Vim workflows.",
+  "author": "Your Name",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}

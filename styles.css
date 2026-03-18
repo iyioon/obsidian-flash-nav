@@ -1,0 +1,22 @@
+.flash-nav-match {
+  background: color-mix(in srgb, var(--text-accent) 18%, transparent);
+  border-radius: 3px;
+}
+
+.flash-nav-match-current {
+  background: color-mix(in srgb, var(--text-accent) 30%, transparent);
+}
+
+.flash-nav-label {
+  margin-left: 0.2em;
+  padding: 0 0.2em;
+  border-radius: 4px;
+  background: var(--text-accent);
+  color: var(--text-on-accent);
+  font-weight: 700;
+  font-size: 0.75em;
+}
+
+.flash-nav-label-current {
+  outline: 1px solid var(--text-normal);
+}
