@@ -1,4 +1,4 @@
-import { Prec, RangeSetBuilder, StateEffect, StateField } from "@codemirror/state";
+import { RangeSetBuilder, StateEffect, StateField } from "@codemirror/state";
 import {
   Decoration,
   EditorView,
@@ -295,6 +295,14 @@ function handleFlashKeydown(event: KeyboardEvent, view: EditorView): boolean {
   return false;
 }
 
+export function isFlashActive(view: EditorView): boolean {
+  return view.state.field(flashStateField).active;
+}
+
+export function handleFlashKeydownForView(view: EditorView, event: KeyboardEvent): boolean {
+  return handleFlashKeydown(event, view);
+}
+
 const flashViewPlugin = ViewPlugin.fromClass(
   class {
     private pendingRefresh = false;
@@ -321,6 +329,11 @@ const flashViewPlugin = ViewPlugin.fromClass(
     private syncActiveClass(): void {
       const state = this.view.state.field(flashStateField);
       this.view.dom.classList.toggle("flash-nav-active", state.active);
+
+      const wrapper = this.view.dom.closest(".workspace-leaf-content");
+      if (wrapper) {
+        wrapper.classList.toggle("flash-nav-leaf-active", state.active);
+      }
     }
 
     update(update: ViewUpdate): void {
@@ -337,20 +350,16 @@ const flashViewPlugin = ViewPlugin.fromClass(
 
     destroy(): void {
       this.view.dom.classList.remove("flash-nav-active");
+      const wrapper = this.view.dom.closest(".workspace-leaf-content");
+      if (wrapper) {
+        wrapper.classList.remove("flash-nav-leaf-active");
+      }
     }
   },
   {}
 );
 
-const flashKeyHandler = Prec.highest(
-  EditorView.domEventHandlers({
-    keydown(event, view) {
-      return handleFlashKeydown(event, view);
-    }
-  })
-);
-
-export const flashExtension = [flashStateField, flashViewPlugin, flashKeyHandler];
+export const flashExtension = [flashStateField, flashViewPlugin];
 
 export function startFlash(view: EditorView): void {
   view.focus();
