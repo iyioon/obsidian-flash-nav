@@ -174,9 +174,10 @@ function assignLabels(view: EditorView, matches: FlashMatch[]): FlashMatch[] {
     }
   }
 
-  const availableLabels = DEFAULT_LABELS
+  const filteredLabels = DEFAULT_LABELS
     .split("")
     .filter((label) => !continuationChars.has(label.toLowerCase()));
+  const availableLabels = filteredLabels.length > 0 ? filteredLabels : DEFAULT_LABELS.split("");
 
   for (let i = 0; i < sorted.length; i += 1) {
     const match = sorted[i];
@@ -219,7 +220,24 @@ function jumpToMatch(view: EditorView, match: FlashMatch): void {
 
 const flashViewPlugin = ViewPlugin.fromClass(
   class {
+    private pendingRefresh = false;
+
     constructor(private readonly view: EditorView) {}
+
+    private scheduleRefresh(): void {
+      if (this.pendingRefresh) {
+        return;
+      }
+
+      this.pendingRefresh = true;
+      queueMicrotask(() => {
+        this.pendingRefresh = false;
+        const state = this.view.state.field(flashStateField);
+        if (state.active) {
+          refreshState(this.view, state.pattern);
+        }
+      });
+    }
 
     update(update: ViewUpdate): void {
       const state = update.state.field(flashStateField);
@@ -228,7 +246,7 @@ const flashViewPlugin = ViewPlugin.fromClass(
       }
 
       if (update.docChanged || update.viewportChanged || update.selectionSet) {
-        refreshState(this.view, state.pattern);
+        this.scheduleRefresh();
       }
     }
   },
