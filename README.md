@@ -23,8 +23,7 @@ Every milestone in this repo is expected to follow the Obsidian guides above.
   - Press shown label letter to jump
   - `Backspace` edits pattern, `Enter` jumps to current target, `Esc` cancels
 - Vim integration path:
-  - Command `Flash Nav: Start jump (bind this to s in Vim normal mode)` is provided
-  - You can bind it to `s` in Obsidian hotkeys/Vimrc workflow
+  - Bind command `Flash Nav: Start jump` to `s` in Obsidian hotkeys/Vimrc workflow
 
 ## Development setup (from Obsidian build guide)
 
@@ -40,7 +39,7 @@ Every milestone in this repo is expected to follow the Obsidian guides above.
 
 To emulate flash.nvim Vim flow (`s` to start):
 
-- Bind `Flash Nav: Start jump (bind this to s in Vim normal mode)` to `s` in your Vim mapping workflow.
+- Bind `Flash Nav: Start jump` to `s` in your Vim mapping workflow.
 
 ## Bind to `.obsidian.vimrc` exactly
 
@@ -51,7 +50,7 @@ If you use the `obsidian-vimrc-support` plugin, add this to your vault root `.ob
 nunmap s
 
 " 1) Alias a short Ex command to the Obsidian command id
-exmap flash obcommand obsidian-flash-nav:flash-nav-start-vim-s
+exmap flash obcommand obsidian-flash-nav:flash-nav-start
 
 " 2) Map normal-mode 's' to the alias
 " IMPORTANT: include <CR> on recent Obsidian/codemirror-vim versions
@@ -60,7 +59,7 @@ nmap s :flash<CR>
 
 Notes:
 
-- The command id is `obsidian-flash-nav:flash-nav-start-vim-s`.
+- The command id is `obsidian-flash-nav:flash-nav-start`.
 - If `s` is already used by another Vim mapping/plugin, keep `nunmap s`.
 - You can map a different key if preferred, e.g. `nmap <leader>s :flash<CR>`.
 - Reload Vimrc plugin or restart Obsidian after editing `.obsidian.vimrc`.
