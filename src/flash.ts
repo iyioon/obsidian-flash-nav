@@ -1,4 +1,4 @@
-import { RangeSetBuilder, StateEffect, StateField } from "@codemirror/state";
+import { StateEffect, StateField } from "@codemirror/state";
 import {
   Decoration,
   EditorView,
@@ -105,13 +105,7 @@ const flashStateField = StateField.define<FlashState>({
         return Decoration.none;
       }
 
-      const builder = new RangeSetBuilder<Decoration>();
-      const ranges: Array<{
-        from: number;
-        to: number;
-        startSide: number;
-        decoration: Decoration;
-      }> = [];
+      const decorations: ReturnType<Decoration["range"]>[] = [];
 
       for (let i = 0; i < state.matches.length; i += 1) {
         const match = state.matches[i];
@@ -121,41 +115,19 @@ const flashStateField = StateField.define<FlashState>({
         const isCurrent = i === state.targetIndex;
         const markClass = isCurrent ? "flash-nav-match flash-nav-match-current" : "flash-nav-match";
 
-        ranges.push({
-          from: match.from,
-          to: match.to,
-          startSide: 0,
-          decoration: Decoration.mark({ class: markClass })
-        });
+        decorations.push(Decoration.mark({ class: markClass }).range(match.from, match.to));
 
         if (match.label) {
-          ranges.push({
-            from: match.to,
-            to: match.to,
-            startSide: 1,
-            decoration: Decoration.widget({
+          decorations.push(
+            Decoration.widget({
               widget: new LabelWidget(match.label, isCurrent),
               side: 1
-            })
-          });
+            }).range(match.to)
+          );
         }
       }
 
-      ranges.sort((a, b) => {
-        if (a.from !== b.from) {
-          return a.from - b.from;
-        }
-        if (a.startSide !== b.startSide) {
-          return a.startSide - b.startSide;
-        }
-        return a.to - b.to;
-      });
-
-      for (const range of ranges) {
-        builder.add(range.from, range.to, range.decoration);
-      }
-
-      return builder.finish();
+      return Decoration.set(decorations, true);
     })
 });
 
