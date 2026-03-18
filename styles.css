@@ -7,6 +7,17 @@
   background: color-mix(in srgb, var(--text-accent) 30%, transparent);
 }
 
+.cm-editor.flash-nav-active .cm-line {
+  opacity: 0.52;
+  transition: opacity 90ms ease;
+}
+
+.cm-editor.flash-nav-active .flash-nav-match,
+.cm-editor.flash-nav-active .flash-nav-match-current,
+.cm-editor.flash-nav-active .flash-nav-label {
+  opacity: 1;
+}
+
 .flash-nav-label {
   margin-left: 0.2em;
   padding: 0 0.2em;
@@ -14,7 +25,8 @@
   background: var(--text-accent);
   color: var(--text-on-accent);
   font-weight: 700;
-  font-size: 0.75em;
+  font-size: inherit;
+  line-height: 1;
 }
 
 .flash-nav-label-current {

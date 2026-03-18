@@ -1,4 +1,4 @@
-import { RangeSetBuilder, StateEffect, StateField } from "@codemirror/state";
+import { Prec, RangeSetBuilder, StateEffect, StateField } from "@codemirror/state";
 import {
   Decoration,
   EditorView,
@@ -244,11 +244,64 @@ function jumpToMatch(view: EditorView, match: FlashMatch): void {
   });
 }
 
+function handleFlashKeydown(event: KeyboardEvent, view: EditorView): boolean {
+  const state = view.state.field(flashStateField);
+  if (!state.active) {
+    return false;
+  }
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    view.dispatch({ effects: stopFlashEffect.of(undefined) });
+    return true;
+  }
+
+  if (event.key === "Backspace") {
+    event.preventDefault();
+    if (state.pattern.length === 0) {
+      view.dispatch({ effects: stopFlashEffect.of(undefined) });
+      return true;
+    }
+    const nextPattern = state.pattern.slice(0, -1);
+    refreshState(view, nextPattern);
+    return true;
+  }
+
+  if (event.key === "Enter") {
+    event.preventDefault();
+    const target = state.targetIndex >= 0 ? state.matches[state.targetIndex] : undefined;
+    if (target) {
+      jumpToMatch(view, target);
+    } else {
+      view.dispatch({ effects: stopFlashEffect.of(undefined) });
+    }
+    return true;
+  }
+
+  const key = event.key.toLowerCase();
+  const byLabel = state.matches.find((match) => match.label === key);
+  if (byLabel) {
+    event.preventDefault();
+    jumpToMatch(view, byLabel);
+    return true;
+  }
+
+  if (isPrintableKey(event)) {
+    event.preventDefault();
+    refreshState(view, state.pattern + key);
+    return true;
+  }
+
+  return false;
+}
+
 const flashViewPlugin = ViewPlugin.fromClass(
   class {
     private pendingRefresh = false;
 
-    constructor(private readonly view: EditorView) {}
+    constructor(private readonly view: EditorView) {
+      this.syncActiveClass();
+    }
 
     private scheduleRefresh(): void {
       if (this.pendingRefresh) {
@@ -265,8 +318,14 @@ const flashViewPlugin = ViewPlugin.fromClass(
       });
     }
 
+    private syncActiveClass(): void {
+      const state = this.view.state.field(flashStateField);
+      this.view.dom.classList.toggle("flash-nav-active", state.active);
+    }
+
     update(update: ViewUpdate): void {
       const state = update.state.field(flashStateField);
+      this.syncActiveClass();
       if (!state.active) {
         return;
       }
@@ -275,61 +334,26 @@ const flashViewPlugin = ViewPlugin.fromClass(
         this.scheduleRefresh();
       }
     }
-  },
-  {
-    eventHandlers: {
-      keydown(event, view) {
-        const state = view.state.field(flashStateField);
-        if (!state.active) {
-          return false;
-        }
 
-        if (event.key === "Escape") {
-          event.preventDefault();
-          view.dispatch({ effects: stopFlashEffect.of(undefined) });
-          return true;
-        }
-
-        if (event.key === "Backspace") {
-          event.preventDefault();
-          const nextPattern = state.pattern.slice(0, -1);
-          refreshState(view, nextPattern);
-          return true;
-        }
-
-        if (event.key === "Enter") {
-          event.preventDefault();
-          const target = state.targetIndex >= 0 ? state.matches[state.targetIndex] : undefined;
-          if (target) {
-            jumpToMatch(view, target);
-          } else {
-            view.dispatch({ effects: stopFlashEffect.of(undefined) });
-          }
-          return true;
-        }
-
-        const byLabel = state.matches.find((match) => match.label === event.key);
-        if (byLabel) {
-          event.preventDefault();
-          jumpToMatch(view, byLabel);
-          return true;
-        }
-
-        if (isPrintableKey(event)) {
-          event.preventDefault();
-          refreshState(view, state.pattern + event.key);
-          return true;
-        }
-
-        return false;
-      }
+    destroy(): void {
+      this.view.dom.classList.remove("flash-nav-active");
     }
-  }
+  },
+  {}
 );
 
-export const flashExtension = [flashStateField, flashViewPlugin];
+const flashKeyHandler = Prec.highest(
+  EditorView.domEventHandlers({
+    keydown(event, view) {
+      return handleFlashKeydown(event, view);
+    }
+  })
+);
+
+export const flashExtension = [flashStateField, flashViewPlugin, flashKeyHandler];
 
 export function startFlash(view: EditorView): void {
+  view.focus();
   const state = view.state.field(flashStateField);
   if (!state.active) {
     view.dispatch({ effects: startFlashEffect.of(undefined) });
