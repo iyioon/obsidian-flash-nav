@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 2026-03-19
+
+### Added
+
+- Search direction and scope controls.
+- Label reuse controls and current-label toggle.
+- Unit tests for core matcher/labeler/placement logic.
+- Demo GIF and release workflow documentation.
+- Automated GitHub Actions release workflow for tag-based publishing.
+
+### Changed
+
+- Renamed plugin display name to `Flash Navigator`.
+- Simplified command name to `Start jump`.
+- Improved label rendering to avoid text shifting and better align with target glyphs.
+- Added optional profiling logs for slow refresh cycles.
+
+### Fixed
+
+- Visual mode jump flow now preserves and extends selection anchor.
+- Fixed label placement and dimming behavior during flash mode.
+- Fixed numeric pattern input and refresh edge cases.
+
 ## [0.1.0] - 2026-03-18
 
 ### Added
