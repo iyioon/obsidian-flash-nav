@@ -82,8 +82,8 @@ Goal: improve jump quality and usability.
 
 Tasks:
 
-- [ ] Add forward/backward direction option.
-- [ ] Add current-line-only and viewport scope options.
+- [x] Add forward/backward direction option.
+- [x] Add current-line-only and viewport scope options.
 - [x] Add autojump when a single match exists.
 - [ ] Add optional fuzzy search mode.
 - [x] Add settings tab with validation and defaults.
@@ -112,13 +112,13 @@ Exit criteria:
 
 - Milestone 1 docs polish: `#8`
 - Milestone 2 tests: `#6`
-- Milestone 4 direction and scope: `#2`
 - Milestone 5 performance profiling: `#3`
 - Milestone 6 release checklist: `#5`
 
 Recently closed:
 
 - Milestone 3 Vim reliability pass: `#1`
+- Milestone 4 direction and scope: `#2`
 
 ## Milestone 6 - Release Readiness
 

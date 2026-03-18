@@ -3,8 +3,7 @@ import {
   Decoration,
   EditorView,
   ViewPlugin,
-  type ViewUpdate,
-  WidgetType
+  type ViewUpdate
 } from "@codemirror/view";
 import type { FlashNavSettings } from "./settings";
 
@@ -26,6 +25,8 @@ type FlashMatch = {
   from: number;
   to: number;
   label?: string;
+  labelFrom?: number;
+  labelTo?: number;
 };
 
 type FlashState = {
@@ -51,35 +52,6 @@ type ReplaceStatePayload = {
 const startFlashEffect = StateEffect.define<void>();
 const stopFlashEffect = StateEffect.define<void>();
 const replaceFlashStateEffect = StateEffect.define<ReplaceStatePayload>();
-
-class LabelWidget extends WidgetType {
-  constructor(
-    private readonly label: string,
-    private readonly current: boolean
-  ) {
-    super();
-  }
-
-  eq(other: LabelWidget): boolean {
-    return this.label === other.label && this.current === other.current;
-  }
-
-  toDOM(): HTMLElement {
-    const anchor = document.createElement("span");
-    anchor.className = "flash-nav-label-anchor";
-
-    const badge = document.createElement("span");
-    badge.className = this.current ? "flash-nav-label flash-nav-label-current" : "flash-nav-label";
-    badge.textContent = this.label;
-
-    anchor.appendChild(badge);
-    return anchor;
-  }
-
-  ignoreEvent(): boolean {
-    return true;
-  }
-}
 
 const flashStateField = StateField.define<FlashState>({
   create() {
@@ -131,12 +103,21 @@ const flashStateField = StateField.define<FlashState>({
         decorations.push(Decoration.mark({ class: markClass }).range(match.from, match.to));
 
         if (match.label) {
-          decorations.push(
-            Decoration.widget({
-              widget: new LabelWidget(match.label, isCurrent),
-              side: 1
-            }).range(match.to)
-          );
+          const labelFrom = match.labelFrom ?? Math.max(match.from, match.to - 1);
+          const labelTo = match.labelTo ?? match.to;
+          if (labelTo > labelFrom) {
+            const labelClass = isCurrent
+              ? "flash-nav-label-slot flash-nav-label-slot-current"
+              : "flash-nav-label-slot";
+            decorations.push(
+              Decoration.mark({
+                class: labelClass,
+                attributes: {
+                  "data-flash-label": match.label
+                }
+              }).range(labelFrom, labelTo)
+            );
+          }
         }
       }
 
@@ -306,7 +287,22 @@ function assignLabels(view: EditorView, matches: FlashMatch[]): FlashMatch[] {
 
 function computeNextState(view: EditorView, pattern: string): ReplaceStatePayload {
   const visibleMatches = findVisibleMatches(view, pattern);
-  const matches = assignLabels(view, visibleMatches);
+  const matches = assignLabels(view, visibleMatches).map((match) => {
+    if (!match.label) {
+      return match;
+    }
+
+    const line = view.state.doc.lineAt(match.to);
+    const canUseNextChar = match.to < line.to;
+    const labelFrom = canUseNextChar ? match.to : Math.max(match.from, match.to - 1);
+    const labelTo = canUseNextChar ? Math.min(match.to + 1, line.to) : match.to;
+
+    return {
+      ...match,
+      labelFrom,
+      labelTo
+    };
+  });
 
   if (activeSettings.autoJumpSingleMatch && matches.length === 1) {
     queueMicrotask(() => {

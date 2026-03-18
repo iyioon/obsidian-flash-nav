@@ -1,19 +1,26 @@
 .flash-nav-match {
   background: color-mix(in srgb, var(--text-accent) 18%, transparent);
   border-radius: 3px;
+  position: relative;
+  z-index: 2;
 }
 
 .flash-nav-match-current {
   background: color-mix(in srgb, var(--text-accent) 30%, transparent);
 }
 
-.cm-editor.flash-nav-active .cm-line {
-  opacity: var(--flash-nav-backdrop-opacity, 0.52);
-  transition: opacity 90ms ease;
+.cm-editor.flash-nav-active .cm-scroller {
+  position: relative;
 }
 
-.cm-editor.flash-nav-active .flash-nav-label {
-  opacity: 1 !important;
+.cm-editor.flash-nav-active .cm-scroller::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--background-primary);
+  opacity: var(--flash-nav-backdrop-opacity, 0.52);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .workspace-leaf-content.flash-nav-leaf-active .view-header-title::after {
@@ -28,31 +35,35 @@
   letter-spacing: 0.03em;
 }
 
-.flash-nav-label-anchor {
+.flash-nav-label-slot {
   position: relative;
   display: inline-block;
-  width: 0;
-  height: 1em;
-  overflow: visible;
-  pointer-events: none;
   vertical-align: baseline;
+  color: transparent !important;
+  z-index: 3;
 }
 
-.flash-nav-label {
+.flash-nav-label-slot::after {
+  content: attr(data-flash-label);
   position: absolute;
-  left: 0.2em;
-  top: 50%;
-  transform: translateY(-55%);
-  padding: 0 0.2em;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
   border-radius: 4px;
   background: var(--text-accent);
   color: var(--text-on-accent);
   font-weight: 700;
-  font-size: inherit;
-  line-height: 1;
-  white-space: nowrap;
+  font-size: 1em;
+  line-height: inherit;
+  white-space: pre;
+  pointer-events: none;
+  z-index: 4;
 }
 
-.flash-nav-label-current {
+.flash-nav-label-slot-current::after {
   outline: 1px solid var(--text-normal);
 }
