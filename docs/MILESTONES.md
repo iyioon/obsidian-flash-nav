@@ -16,11 +16,11 @@ Goal: stable plugin scaffold and repeatable local workflow.
 
 Tasks:
 
-- [ ] Keep project structure aligned with the Obsidian build guide (`manifest.json`, `main.js` build output, `styles.css`).
-- [ ] Confirm `npm run dev` watch loop rebuilds on source changes.
-- [ ] Confirm plugin can be loaded from `.obsidian/plugins/obsidian-flash-nav/` in a dedicated dev vault.
-- [ ] Add command palette command for quick sanity check.
-- [ ] Add issue templates and labels for milestone tracking.
+- [x] Keep project structure aligned with the Obsidian build guide (`manifest.json`, `main.js` build output, `styles.css`).
+- [x] Confirm `npm run dev` watch loop rebuilds on source changes.
+- [x] Confirm plugin can be loaded from `.obsidian/plugins/obsidian-flash-nav/` in a dedicated dev vault.
+- [x] Add command palette command for quick sanity check.
+- [x] Add issue templates and labels for milestone tracking.
 
 Exit criteria:
 
@@ -32,14 +32,14 @@ Goal: basic flash-like jump with labels in current editor viewport.
 
 Tasks:
 
-- [ ] Register a CM6 editor extension via `registerEditorExtension()` (follow editor extension guide).
-- [ ] Add plugin command: start flash mode.
-- [ ] Capture typed pattern while mode is active.
-- [ ] Find exact matches in visible viewport only.
-- [ ] Assign deterministic labels from configurable alphabet.
-- [ ] Render decorations for matches and labels.
-- [ ] Jump to target when label is typed.
-- [ ] Cancel with `Esc` and clear state/decorations.
+- [x] Register a CM6 editor extension via `registerEditorExtension()` (follow editor extension guide).
+- [x] Add plugin command: start flash mode.
+- [x] Capture typed pattern while mode is active.
+- [x] Find exact matches in visible viewport only.
+- [x] Assign deterministic labels from configurable alphabet.
+- [x] Render decorations for matches and labels.
+- [x] Jump to target when label is typed.
+- [x] Cancel with `Esc` and clear state/decorations.
 
 Exit criteria:
 
@@ -51,10 +51,10 @@ Goal: robust internal architecture using CM6 patterns recommended by Obsidian do
 
 Tasks:
 
-- [ ] Move active flash state to a `StateField`.
-- [ ] Use `StateEffect` values for pattern updates, start/stop, and jump actions.
-- [ ] Add `ViewPlugin` for view-driven updates and cleanup.
-- [ ] Ensure no leaked listeners/decorations after plugin unload.
+- [x] Move active flash state to a `StateField`.
+- [x] Use `StateEffect` values for pattern updates, start/stop, and jump actions.
+- [x] Add `ViewPlugin` for view-driven updates and cleanup.
+- [x] Ensure no leaked listeners/decorations after plugin unload.
 - [ ] Add unit-like tests for matcher and label assignment logic.
 
 Exit criteria:
@@ -68,9 +68,9 @@ Goal: make flash mode ergonomic for Obsidian Vim users while preserving compatib
 Tasks:
 
 - [ ] Add optional keybind profile for Vim users (default off).
-- [ ] Provide command-first integration path that works without internals.
-- [ ] Experiment with mapping behavior for `s`-style trigger in Vim mode when possible.
-- [ ] Document known limitations versus `flash.nvim` features tied to Neovim internals.
+- [x] Provide command-first integration path that works without internals.
+- [x] Experiment with mapping behavior for `s`-style trigger in Vim mode when possible.
+- [x] Document known limitations versus `flash.nvim` features tied to Neovim internals.
 
 Exit criteria:
 
@@ -84,9 +84,9 @@ Tasks:
 
 - [ ] Add forward/backward direction option.
 - [ ] Add current-line-only and viewport scope options.
-- [ ] Add autojump when a single match exists.
+- [x] Add autojump when a single match exists.
 - [ ] Add optional fuzzy search mode.
-- [ ] Add settings tab with validation and defaults.
+- [x] Add settings tab with validation and defaults.
 
 Exit criteria:
 
@@ -107,6 +107,18 @@ Tasks:
 Exit criteria:
 
 - Flash mode remains responsive under realistic heavy notes.
+
+## Current Active GitHub Issues
+
+- Milestone 1 docs polish: `#8`
+- Milestone 2 tests: `#6`
+- Milestone 4 direction and scope: `#2`
+- Milestone 5 performance profiling: `#3`
+- Milestone 6 release checklist: `#5`
+
+Recently closed:
+
+- Milestone 3 Vim reliability pass: `#1`
 
 ## Milestone 6 - Release Readiness
 

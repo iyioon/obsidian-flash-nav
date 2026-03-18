@@ -2,6 +2,18 @@
 
 Use this list to seed GitHub issues for milestone tracking.
 
+Current tracked GitHub issues:
+
+- #2 Milestone 4: Direction and scope controls
+- #3 Milestone 5: Performance profiling and recomputation strategy
+- #5 Milestone 6: Public release and community submission checklist
+- #6 Milestone 2: Add tests for matcher and label assignment
+- #8 Milestone 1: Add command demo GIF and screenshots to README
+
+Recently closed:
+
+- #1 Milestone 3: Validate Vim normal-mode flow across mapping setups
+
 ## Milestone 0
 
 1. Bootstrap plugin repo from Obsidian sample conventions
