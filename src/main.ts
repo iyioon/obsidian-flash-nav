@@ -15,15 +15,6 @@ export default class ObsidianFlashNavPlugin extends Plugin {
       return;
     }
 
-    const target = event.target;
-    const targetNode = target && typeof target === "object" && "nodeType" in target
-      ? (target as Node)
-      : null;
-
-    if (!targetNode || !cm.dom.contains(targetNode)) {
-      return;
-    }
-
     const consumed = handleFlashKeydownForView(cm, event);
     if (consumed) {
       event.preventDefault();

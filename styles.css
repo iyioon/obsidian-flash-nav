@@ -12,10 +12,8 @@
   transition: opacity 90ms ease;
 }
 
-.cm-editor.flash-nav-active .flash-nav-match,
-.cm-editor.flash-nav-active .flash-nav-match-current,
 .cm-editor.flash-nav-active .flash-nav-label {
-  opacity: 1;
+  opacity: 1 !important;
 }
 
 .workspace-leaf-content.flash-nav-leaf-active .view-header-title::after {

@@ -160,7 +160,7 @@ const flashStateField = StateField.define<FlashState>({
 });
 
 function isPrintableKey(event: KeyboardEvent): boolean {
-  return event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
+  return event.key.length === 1 && !event.ctrlKey && !event.metaKey;
 }
 
 function findVisibleMatches(view: EditorView, pattern: string): FlashMatch[] {
