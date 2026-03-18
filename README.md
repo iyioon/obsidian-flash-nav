@@ -1,8 +1,16 @@
 # Obsidian Flash Nav
 
-Flash-style label navigation for Obsidian, inspired by `folke/flash.nvim` and built with CodeMirror 6 editor extensions.
+Flash-style label navigation for Obsidian, inspired by `folke/flash.nvim`.
 
-## Current features
+![Flash Nav demo](assets/demo/flash-nav-flow.gif)
+
+Fast flow:
+
+1. Trigger `Flash Nav: Start jump` (or mapped `s` in Vim normal mode).
+2. Type a search pattern.
+3. Press the label character to jump.
+
+## Features
 
 - Start flash mode from command palette: `Flash Nav: Start jump`
 - Type a pattern, see label hints, press label to jump
@@ -18,7 +26,7 @@ Flash-style label navigation for Obsidian, inspired by `folke/flash.nvim` and bu
   - auto-jump on single match
   - backdrop dim opacity
 
-## Install for development
+## Setup (Development)
 
 Based on the official Obsidian build workflow:
 https://docs.obsidian.md/Plugins/Getting+started/Build+a+plugin
@@ -31,7 +39,7 @@ https://docs.obsidian.md/Plugins/Getting+started/Build+a+plugin
    - `<Vault>/.obsidian/plugins/obsidian-flash-nav/`
 5. In Obsidian, enable Community plugins and turn on `Obsidian Flash Nav`.
 
-## Vim mapping (`.obsidian.vimrc`)
+## Vim Mapping (`.obsidian.vimrc`)
 
 If you use `obsidian-vimrc-support`, add this to your vault root `.obsidian.vimrc`:
 
@@ -53,7 +61,7 @@ Notes:
 - `obcommand` is provided by `obsidian-vimrc-support` and may change; fallback is direct Obsidian hotkey binding.
 - Run `:obcommand` to inspect available command ids.
 
-## Roadmap
+## Project
 
 - GitHub issues: https://github.com/iyioon/obsidian-flash-nav/issues
 - GitHub milestones: https://github.com/iyioon/obsidian-flash-nav/milestones
