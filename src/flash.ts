@@ -140,11 +140,16 @@ function isPrintableKey(event: KeyboardEvent): boolean {
   return event.key.length === 1 && !event.ctrlKey && !event.metaKey;
 }
 
-function findMatches(view: EditorView, pattern: string): FlashMatch[] {
+function findMatches(
+  view: EditorView,
+  docText: string,
+  cursorPos: number,
+  pattern: string
+): FlashMatch[] {
   return findMatchesCore({
-    doc: view.state.doc.toString(),
+    doc: docText,
     pattern,
-    cursorPos: view.state.selection.main.head,
+    cursorPos,
     visibleRanges: view.visibleRanges,
     searchScope: activeSettings.searchScope,
     searchDirection: activeSettings.searchDirection,
@@ -153,11 +158,15 @@ function findMatches(view: EditorView, pattern: string): FlashMatch[] {
   });
 }
 
-function assignLabelsForView(view: EditorView, matches: FlashMatch[]): FlashMatch[] {
+function assignLabelsForView(
+  docText: string,
+  cursorPos: number,
+  matches: FlashMatch[]
+): FlashMatch[] {
   return assignLabelsCore({
-    doc: view.state.doc.toString(),
+    doc: docText,
     matches,
-    cursorPos: view.state.selection.main.head,
+    cursorPos,
     labelAlphabet: activeSettings.labelAlphabet,
     labelReuseMode: activeSettings.labelReuseMode,
     labelCurrentMatch: activeSettings.labelCurrentMatch,
@@ -167,8 +176,12 @@ function assignLabelsForView(view: EditorView, matches: FlashMatch[]): FlashMatc
 }
 
 function computeNextState(view: EditorView, pattern: string): ReplaceStatePayload {
-  const matchesInScope = findMatches(view, pattern);
-  const matches = applyLabelPlacementCore(view.state.doc.toString(), assignLabelsForView(view, matchesInScope));
+  const docText = view.state.doc.toString();
+  const cursorPos = view.state.selection.main.head;
+
+  const matchesInScope = findMatches(view, docText, cursorPos, pattern);
+  const labeled = assignLabelsForView(docText, cursorPos, matchesInScope);
+  const matches = applyLabelPlacementCore(docText, labeled);
 
   if (activeSettings.autoJumpSingleMatch && matches.length === 1) {
     queueMicrotask(() => {
@@ -191,8 +204,29 @@ function computeNextState(view: EditorView, pattern: string): ReplaceStatePayloa
 }
 
 function refreshState(view: EditorView, pattern: string): void {
+  const current = view.state.field(flashStateField);
+  const next = computeNextState(view, pattern);
+
+  const isSameState =
+    current.pattern === next.pattern
+    && current.targetIndex === next.targetIndex
+    && current.matches.length === next.matches.length
+    && current.matches.every((match, idx) => {
+      const other = next.matches[idx];
+      return other
+        && match.from === other.from
+        && match.to === other.to
+        && match.label === other.label
+        && match.labelFrom === other.labelFrom
+        && match.labelTo === other.labelTo;
+    });
+
+  if (isSameState) {
+    return;
+  }
+
   view.dispatch({
-    effects: replaceFlashStateEffect.of(computeNextState(view, pattern))
+    effects: replaceFlashStateEffect.of(next)
   });
 }
 
@@ -279,6 +313,7 @@ export function handleFlashKeydownForView(view: EditorView, event: KeyboardEvent
 const flashViewPlugin = ViewPlugin.fromClass(
   class {
     private pendingRefresh = false;
+    private lastRefreshSignature = "";
 
     constructor(private readonly view: EditorView) {
       this.syncActiveClass();
@@ -294,6 +329,11 @@ const flashViewPlugin = ViewPlugin.fromClass(
         this.pendingRefresh = false;
         const state = this.view.state.field(flashStateField);
         if (state.active) {
+          const signature = `${state.pattern}|${this.view.state.selection.main.head}|${this.view.visibleRanges.map((r) => `${r.from}:${r.to}`).join(",")}`;
+          if (signature === this.lastRefreshSignature) {
+            return;
+          }
+          this.lastRefreshSignature = signature;
           refreshState(this.view, state.pattern);
         }
       });
@@ -325,6 +365,7 @@ const flashViewPlugin = ViewPlugin.fromClass(
       }
 
       if (!state.active) {
+        this.lastRefreshSignature = "";
         return;
       }
 

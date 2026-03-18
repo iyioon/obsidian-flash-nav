@@ -24,6 +24,7 @@ All notable changes to this project will be documented in this file.
 - Overlay-style label rendering to avoid shifting surrounding text.
 - Label anchoring moved to the next character after matched text, with safe fallback at line end.
 - Flash now preserves visual-mode anchor to allow selection extension on jump.
+- Reduced redundant refresh dispatches by skipping unchanged flash state updates.
 
 ### Fixed
 
