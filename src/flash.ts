@@ -10,6 +10,8 @@ import type { FlashNavSettings } from "./settings";
 
 let activeSettings: FlashNavSettings = {
   labelAlphabet: "asdfghjklqwertyuiopzxcvbnm",
+  labelReuseMode: "lowercase",
+  labelCurrentMatch: true,
   caseSensitive: false,
   smartCase: true,
   autoJumpSingleMatch: false,
@@ -61,10 +63,15 @@ class LabelWidget extends WidgetType {
   }
 
   toDOM(): HTMLElement {
-    const span = document.createElement("span");
-    span.className = this.current ? "flash-nav-label flash-nav-label-current" : "flash-nav-label";
-    span.textContent = this.label;
-    return span;
+    const anchor = document.createElement("span");
+    anchor.className = "flash-nav-label-anchor";
+
+    const badge = document.createElement("span");
+    badge.className = this.current ? "flash-nav-label flash-nav-label-current" : "flash-nav-label";
+    badge.textContent = this.label;
+
+    anchor.appendChild(badge);
+    return anchor;
   }
 
   ignoreEvent(): boolean {
@@ -196,9 +203,28 @@ function assignLabels(view: EditorView, matches: FlashMatch[]): FlashMatch[] {
     .filter((label) => !continuationChars.has(label.toLowerCase()));
   const availableLabels = filteredLabels.length > 0 ? filteredLabels : labels.split("");
 
+  const canReuseLabel = (label: string): boolean => {
+    if (activeSettings.labelReuseMode === "none") {
+      return false;
+    }
+    if (activeSettings.labelReuseMode === "all") {
+      return true;
+    }
+    return label.toLowerCase() === label;
+  };
+
   for (let i = 0; i < sorted.length; i += 1) {
     const match = sorted[i];
+    const isCurrent = i === 0;
     if (!match) {
+      continue;
+    }
+
+    if (!activeSettings.labelCurrentMatch && isCurrent) {
+      continue;
+    }
+
+    if (activeSettings.labelReuseMode === "none") {
       continue;
     }
 
@@ -221,6 +247,10 @@ function assignLabels(view: EditorView, matches: FlashMatch[]): FlashMatch[] {
 
   for (let i = 0; i < sorted.length; i += 1) {
     const match = sorted[i];
+    const isCurrent = i === 0;
+    if (!activeSettings.labelCurrentMatch && isCurrent) {
+      continue;
+    }
     if (match?.label) {
       continue;
     }
@@ -230,7 +260,9 @@ function assignLabels(view: EditorView, matches: FlashMatch[]): FlashMatch[] {
         ...match,
         label
       };
-      reusedLabelsByPos.set(match.from, label);
+      if (canReuseLabel(label)) {
+        reusedLabelsByPos.set(match.from, label);
+      }
     }
   }
 
@@ -402,5 +434,14 @@ export function startFlash(view: EditorView): void {
 }
 
 export function setFlashSettings(settings: FlashNavSettings): void {
+  const shouldResetReuse =
+    activeSettings.labelAlphabet !== settings.labelAlphabet
+    || activeSettings.labelReuseMode !== settings.labelReuseMode
+    || activeSettings.labelCurrentMatch !== settings.labelCurrentMatch;
+
   activeSettings = settings;
+
+  if (shouldResetReuse) {
+    reusedLabelsByPos.clear();
+  }
 }

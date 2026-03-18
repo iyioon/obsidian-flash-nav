@@ -10,6 +10,8 @@ Flash-style label navigation for Obsidian, inspired by `folke/flash.nvim` and bu
 - Vim-friendly workflow via Obsidian hotkeys or `.obsidian.vimrc`
 - Configurable settings:
   - label alphabet
+  - label reuse mode (none/lowercase/all)
+  - label current match toggle
   - case sensitive and smart-case matching
   - auto-jump on single match
   - backdrop dim opacity

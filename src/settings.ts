@@ -3,6 +3,8 @@ import type ObsidianFlashNavPlugin from "./main";
 
 export interface FlashNavSettings {
   labelAlphabet: string;
+  labelReuseMode: "none" | "lowercase" | "all";
+  labelCurrentMatch: boolean;
   caseSensitive: boolean;
   smartCase: boolean;
   autoJumpSingleMatch: boolean;
@@ -11,6 +13,8 @@ export interface FlashNavSettings {
 
 export const DEFAULT_SETTINGS: FlashNavSettings = {
   labelAlphabet: "asdfghjklqwertyuiopzxcvbnm",
+  labelReuseMode: "lowercase",
+  labelCurrentMatch: true,
   caseSensitive: false,
   smartCase: true,
   autoJumpSingleMatch: false,
@@ -42,6 +46,10 @@ export function normalizeSettings(raw: unknown): FlashNavSettings {
   };
 
   merged.labelAlphabet = sanitizeLabelAlphabet(merged.labelAlphabet ?? "");
+  if (!["none", "lowercase", "all"].includes(String(merged.labelReuseMode))) {
+    merged.labelReuseMode = DEFAULT_SETTINGS.labelReuseMode;
+  }
+  merged.labelCurrentMatch = Boolean(merged.labelCurrentMatch);
   merged.backdropOpacity = Math.max(0, Math.min(90, Number(merged.backdropOpacity ?? DEFAULT_SETTINGS.backdropOpacity)));
 
   return merged;
@@ -69,6 +77,29 @@ export class FlashNavSettingTab extends PluginSettingTab {
             await this.plugin.updateSettings({ labelAlphabet: value });
             text.setValue(this.plugin.settings.labelAlphabet);
           });
+      });
+
+    new Setting(containerEl)
+      .setName("Label reuse mode")
+      .setDesc("Reuse existing labels while refining search (flash.nvim-style).")
+      .addDropdown((dropdown) => {
+        dropdown
+          .addOption("none", "None")
+          .addOption("lowercase", "Lowercase")
+          .addOption("all", "All")
+          .setValue(this.plugin.settings.labelReuseMode)
+          .onChange(async (value) => {
+            await this.plugin.updateSettings({ labelReuseMode: value as FlashNavSettings["labelReuseMode"] });
+          });
+      });
+
+    new Setting(containerEl)
+      .setName("Label current match")
+      .setDesc("Show label on the current primary match. Enter can always jump current match.")
+      .addToggle((toggle) => {
+        toggle.setValue(this.plugin.settings.labelCurrentMatch).onChange(async (value) => {
+          await this.plugin.updateSettings({ labelCurrentMatch: value });
+        });
       });
 
     new Setting(containerEl)
