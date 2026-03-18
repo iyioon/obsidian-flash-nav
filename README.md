@@ -42,6 +42,29 @@ To emulate flash.nvim Vim flow (`s` to start):
 
 - Bind `Flash Nav: Start jump (bind this to s in Vim normal mode)` to `s` in your Vim mapping workflow.
 
+## Bind to `.obsidian.vimrc` exactly
+
+If you use the `obsidian-vimrc-support` plugin, add this to your vault root `.obsidian.vimrc` file (not inside `.obsidian/`):
+
+```vim
+" Optional: free the default 's' behavior first
+nunmap s
+
+" 1) Alias a short Ex command to the Obsidian command id
+exmap flash obcommand obsidian-flash-nav:flash-nav-start-vim-s
+
+" 2) Map normal-mode 's' to the alias
+" IMPORTANT: include <CR> on recent Obsidian/codemirror-vim versions
+nmap s :flash<CR>
+```
+
+Notes:
+
+- The command id is `obsidian-flash-nav:flash-nav-start-vim-s`.
+- If `s` is already used by another Vim mapping/plugin, keep `nunmap s`.
+- You can map a different key if preferred, e.g. `nmap <leader>s :flash<CR>`.
+- Reload Vimrc plugin or restart Obsidian after editing `.obsidian.vimrc`.
+
 Use a dedicated development vault as recommended by Obsidian docs.
 
 ## Milestones and issues
