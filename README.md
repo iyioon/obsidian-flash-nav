@@ -1,6 +1,6 @@
 # Obsidian Flash Nav
 
-Flash-style label navigation for the Obsidian editor, inspired by `folke/flash.nvim`.
+Flash-style label navigation inspired by `folke/flash.nvim`.
 
 ![Flash Nav demo](assets/demo/flash-nav-flow.gif)
 

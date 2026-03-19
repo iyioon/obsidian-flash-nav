@@ -9,6 +9,12 @@ All notable changes to this project will be documented in this file.
 - Updated plugin id to `flash-navigator` to comply with Obsidian submission requirement that plugin ids must not contain `obsidian`.
 - Updated docs and Vim mapping command id references to `flash-navigator:flash-nav-start`.
 
+## [0.2.2] - 2026-03-19
+
+### Changed
+
+- Updated plugin description text to avoid including the word `Obsidian` per submission guidance.
+
 ## [0.2.0] - 2026-03-19
 
 ### Added

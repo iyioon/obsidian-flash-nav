@@ -73,7 +73,7 @@ Entry format:
   "id": "flash-navigator",
   "name": "Flash Navigator",
   "author": "iyioon",
-  "description": "Flash-style label-based navigation for Obsidian editor with Vim workflows.",
+  "description": "Flash-style label-based navigation with Vim workflows.",
   "repo": "iyioon/obsidian-flash-nav"
 }
 ```
