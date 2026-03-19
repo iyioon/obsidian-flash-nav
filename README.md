@@ -36,7 +36,7 @@ https://docs.obsidian.md/Plugins/Getting+started/Build+a+plugin
 3. Run `npm run dev` (watch mode) or `npm run build`.
    - Run `npm run test` for matcher/labeler unit checks.
 4. Copy this repo into your vault plugin folder:
-   - `<Vault>/.obsidian/plugins/obsidian-flash-nav/`
+   - `<Vault>/.obsidian/plugins/flash-navigator/`
 5. In Obsidian, enable Community plugins and turn on `Flash Navigator`.
 
 ## Vim Mapping (`.obsidian.vimrc`)
@@ -49,7 +49,7 @@ nunmap s
 vunmap s
 
 " Alias Obsidian command id to a short ex command
-exmap flash obcommand obsidian-flash-nav:flash-nav-start
+exmap flash obcommand flash-navigator:flash-nav-start
 
 " Map normal mode and visual mode s to flash
 nmap s :flash<CR>
@@ -58,7 +58,7 @@ vmap s :flash<CR>
 
 Notes:
 
-- Command id is `obsidian-flash-nav:flash-nav-start`.
+- Command id is `flash-navigator:flash-nav-start`.
 - `<CR>` is required for ex command mappings in recent codemirror-vim versions.
 - Visual mode requires `vmap s :flash<CR>`; without it, Vim keeps default visual substitute behavior.
 - `obcommand` is provided by `obsidian-vimrc-support` and may change; fallback is direct Obsidian hotkey binding.

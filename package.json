@@ -1,6 +1,6 @@
 {
   "name": "obsidian-flash-nav",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Flash-style navigation plugin for Obsidian",
   "main": "main.js",
   "type": "module",

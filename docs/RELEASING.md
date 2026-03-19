@@ -70,7 +70,7 @@ Entry format:
 
 ```json
 {
-  "id": "obsidian-flash-nav",
+  "id": "flash-navigator",
   "name": "Flash Navigator",
   "author": "iyioon",
   "description": "Flash-style label-based navigation for Obsidian editor with Vim workflows.",
