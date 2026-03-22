@@ -74,7 +74,7 @@ export class FlashNavSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl("h2", { text: "Flash Nav settings" });
+    new Setting(containerEl).setName("Flash nav").setHeading();
 
     new Setting(containerEl)
       .setName("Label alphabet")

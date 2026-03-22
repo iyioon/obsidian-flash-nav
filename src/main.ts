@@ -1,12 +1,18 @@
 import { Plugin, Editor, MarkdownView, Notice } from "obsidian";
-import { EditorView } from "@codemirror/view";
 import { flashExtension, handleFlashKeydownForView, isFlashActive, setFlashSettings, startFlash } from "./flash";
 import { FlashNavSettingTab, normalizeSettings, type FlashNavSettings } from "./settings";
 
 export default class ObsidianFlashNavPlugin extends Plugin {
   settings: FlashNavSettings = normalizeSettings(undefined);
+  private asFlashView(value: unknown): Parameters<typeof startFlash>[0] | null {
+    if (!value) {
+      return null;
+    }
+    return value as Parameters<typeof startFlash>[0];
+  }
+
   private keydownHandler = (event: KeyboardEvent): void => {
-    const cm = this.resolveActiveEditorView();
+    const cm = this.asFlashView(this.resolveActiveEditorView());
     if (!cm || !isFlashActive(cm)) {
       return;
     }
@@ -52,13 +58,13 @@ export default class ObsidianFlashNavPlugin extends Plugin {
     this.settings = normalizeSettings(await this.loadData());
   }
 
-  private resolveActiveEditorView(): EditorView | null {
+  private resolveActiveEditorView(): unknown {
     const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
     if (!markdownView) {
       return null;
     }
 
-    const editor = markdownView.editor as Editor & { cm?: EditorView };
+    const editor = markdownView.editor as Editor & { cm?: unknown };
     return editor.cm ?? null;
   }
 
@@ -80,9 +86,9 @@ export default class ObsidianFlashNavPlugin extends Plugin {
       id: "flash-nav-start",
       name: "Start jump",
       editorCallback: (editor: Editor, _view: MarkdownView) => {
-        const cm = (editor as Editor & { cm?: EditorView }).cm ?? this.resolveActiveEditorView();
+        const cm = this.asFlashView((editor as Editor & { cm?: unknown }).cm ?? this.resolveActiveEditorView());
         if (!cm) {
-          new Notice("Flash Nav is only available in the markdown editor.");
+          new Notice("Flash nav is only available in the Markdown editor.");
           return;
         }
         startFlash(cm);
