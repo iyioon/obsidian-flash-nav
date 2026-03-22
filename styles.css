@@ -2,25 +2,25 @@
   background: color-mix(in srgb, var(--text-accent) 18%, transparent);
   border-radius: 3px;
   position: relative;
-  z-index: 2;
+  z-index: 3;
 }
 
 .flash-nav-match-current {
   background: color-mix(in srgb, var(--text-accent) 30%, transparent);
 }
 
-.cm-editor.flash-nav-active .cm-scroller {
+.cm-editor.flash-nav-active {
   position: relative;
 }
 
-.cm-editor.flash-nav-active .cm-scroller::before {
+.cm-editor.flash-nav-active::before {
   content: "";
   position: absolute;
   inset: 0;
   background: var(--background-primary);
   opacity: var(--flash-nav-backdrop-opacity, 0.52);
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
 }
 
 .workspace-leaf-content.flash-nav-leaf-active .view-header-title::after {
@@ -40,7 +40,7 @@
   display: inline-block;
   vertical-align: baseline;
   color: transparent !important;
-  z-index: 3;
+  z-index: 4;
 }
 
 .flash-nav-label-slot::after {
@@ -61,7 +61,7 @@
   line-height: inherit;
   white-space: pre;
   pointer-events: none;
-  z-index: 4;
+  z-index: 5;
 }
 
 .flash-nav-label-slot-current::after {

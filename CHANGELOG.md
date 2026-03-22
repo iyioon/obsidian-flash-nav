@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.3] - 2026-03-19
+
+### Fixed
+
+- Fixed flash backdrop overlay behavior while scrolling so dimming remains consistent for headings and regular text.
+
 ## [0.2.1] - 2026-03-19
 
 ### Changed
