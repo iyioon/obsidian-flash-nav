@@ -351,12 +351,18 @@ export function handleFlashKeydownForView(view: EditorView, event: KeyboardEvent
   return handleFlashKeydown(event, view);
 }
 
-function toFlashView(value: unknown): EditorView | null {
+function toFlashView(value: unknown): unknown {
   if (!value || typeof value !== "object") {
     return null;
   }
 
-  const maybe = value as Partial<EditorView>;
+  const maybe = value as {
+    dispatch?: unknown;
+    state?: unknown;
+    dom?: unknown;
+    focus?: unknown;
+  };
+
   if (typeof maybe.dispatch !== "function") {
     return null;
   }
@@ -367,17 +373,17 @@ function toFlashView(value: unknown): EditorView | null {
     return null;
   }
 
-  return value as EditorView;
+  return value;
 }
 
 export function isFlashActiveOn(value: unknown): boolean {
   const view = toFlashView(value);
-  return view ? isFlashActive(view) : false;
+  return view ? isFlashActive(view as Parameters<typeof isFlashActive>[0]) : false;
 }
 
 export function handleFlashKeydownOn(value: unknown, event: KeyboardEvent): boolean {
   const view = toFlashView(value);
-  return view ? handleFlashKeydownForView(view, event) : false;
+  return view ? handleFlashKeydownForView(view as Parameters<typeof handleFlashKeydownForView>[0], event) : false;
 }
 
 export function startFlashOn(value: unknown): boolean {
@@ -385,7 +391,7 @@ export function startFlashOn(value: unknown): boolean {
   if (!view) {
     return false;
   }
-  startFlash(view);
+  startFlash(view as Parameters<typeof startFlash>[0]);
   return true;
 }
 
