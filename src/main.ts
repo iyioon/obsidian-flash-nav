@@ -1,27 +1,21 @@
 import { Plugin, Editor, MarkdownView, Notice } from "obsidian";
-import { flashExtension, handleFlashKeydownForView, isFlashActive, setFlashSettings, startFlash } from "./flash";
+import { flashExtension, handleFlashKeydownOn, isFlashActiveOn, setFlashSettings, startFlashOn } from "./flash";
 import { FlashNavSettingTab, normalizeSettings, type FlashNavSettings } from "./settings";
 
 export default class ObsidianFlashNavPlugin extends Plugin {
   settings: FlashNavSettings = normalizeSettings(undefined);
-  private asFlashView(value: unknown): Parameters<typeof startFlash>[0] | null {
-    if (!value) {
-      return null;
-    }
-    return value as Parameters<typeof startFlash>[0];
-  }
-
   private keydownHandler = (event: KeyboardEvent): void => {
-    const cm = this.asFlashView(this.resolveActiveEditorView());
-    if (!cm || !isFlashActive(cm)) {
+    const cm = this.resolveActiveEditorView();
+    if (!isFlashActiveOn(cm)) {
       return;
     }
 
-    if (!cm.hasFocus) {
+    const maybeView = cm as { hasFocus?: boolean };
+    if (!maybeView.hasFocus) {
       return;
     }
 
-    const consumed = handleFlashKeydownForView(cm, event);
+    const consumed = handleFlashKeydownOn(cm, event);
     if (consumed) {
       event.preventDefault();
       event.stopPropagation();
@@ -86,12 +80,11 @@ export default class ObsidianFlashNavPlugin extends Plugin {
       id: "flash-nav-start",
       name: "Start jump",
       editorCallback: (editor: Editor, _view: MarkdownView) => {
-        const cm = this.asFlashView((editor as Editor & { cm?: unknown }).cm ?? this.resolveActiveEditorView());
-        if (!cm) {
+        const cm = (editor as Editor & { cm?: unknown }).cm ?? this.resolveActiveEditorView();
+        if (!startFlashOn(cm)) {
           new Notice("Flash nav is only available in the Markdown editor.");
           return;
         }
-        startFlash(cm);
       }
     });
   }

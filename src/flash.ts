@@ -351,6 +351,44 @@ export function handleFlashKeydownForView(view: EditorView, event: KeyboardEvent
   return handleFlashKeydown(event, view);
 }
 
+function toFlashView(value: unknown): EditorView | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const maybe = value as Partial<EditorView>;
+  if (typeof maybe.dispatch !== "function") {
+    return null;
+  }
+  if (!maybe.state || !maybe.dom) {
+    return null;
+  }
+  if (typeof maybe.focus !== "function") {
+    return null;
+  }
+
+  return value as EditorView;
+}
+
+export function isFlashActiveOn(value: unknown): boolean {
+  const view = toFlashView(value);
+  return view ? isFlashActive(view) : false;
+}
+
+export function handleFlashKeydownOn(value: unknown, event: KeyboardEvent): boolean {
+  const view = toFlashView(value);
+  return view ? handleFlashKeydownForView(view, event) : false;
+}
+
+export function startFlashOn(value: unknown): boolean {
+  const view = toFlashView(value);
+  if (!view) {
+    return false;
+  }
+  startFlash(view);
+  return true;
+}
+
 const flashViewPlugin = ViewPlugin.fromClass(
   class {
     private pendingRefresh = false;
