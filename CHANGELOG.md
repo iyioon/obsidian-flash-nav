@@ -4,14 +4,26 @@ All notable changes to this project will be documented in this file.
 
 ## [0.2.3] - 2026-03-19
 
-### Fixed
-
-- Fixed flash backdrop overlay behavior while scrolling so dimming remains consistent for headings and regular text.
-
 ### Added
 
 - Added settings for regular label color and active/current label color.
-- Added reset buttons for label colors to restore Obsidian accent color behavior.
+- Added reset buttons for label colors to restore to current theme accent color.
+
+### Changed
+
+- Improved label styling and width for clearer jump targets.
+
+### Fixed
+
+- Fixed flash backdrop overlay behavior while scrolling so dimming remains consistent for headings and regular text.
+- Fixed dim layering so matching text and labels remain fully visible while flash is active.
+- Fixed remaining review-bot typing issue related to `EditorView` error-type usage.
+
+## [0.2.2] - 2026-03-19
+
+### Changed
+
+- Updated plugin description text to avoid including the word `Obsidian` per submission guidance.
 
 ## [0.2.1] - 2026-03-19
 
@@ -19,12 +31,6 @@ All notable changes to this project will be documented in this file.
 
 - Updated plugin id to `flash-navigator` to comply with Obsidian submission requirement that plugin ids must not contain `obsidian`.
 - Updated docs and Vim mapping command id references to `flash-navigator:flash-nav-start`.
-
-## [0.2.2] - 2026-03-19
-
-### Changed
-
-- Updated plugin description text to avoid including the word `Obsidian` per submission guidance.
 
 ## [0.2.0] - 2026-03-19
 
@@ -53,32 +59,11 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Initial Obsidian plugin scaffold with build pipeline.
-- Flash jump command and viewport-based pattern matching.
+- Initial plugin scaffold, build pipeline, and release metadata files.
+- Flash jump command and viewport-based pattern matching MVP.
 - Label rendering and jump-by-label workflow.
 - Vim mapping documentation for `.obsidian.vimrc`.
-- Settings for label alphabet, case sensitivity, smart-case, auto-jump, and backdrop opacity.
-- Label reuse controls (`none`, `lowercase`, `all`) and current-label toggle.
-- Search direction controls (`closest`, `forward`, `backward`).
-- Search scope controls (`viewport`, `line`, `document`).
-- Extracted pure flash core logic into `src/flash-core.ts` for testability.
-- Added unit tests in `tests/flash-core.test.ts` and `npm run test` workflow.
-- Added GitHub Actions release workflow for tag-based test/build/publish.
-
-### Changed
-
-- Hardened key capture behavior for Vim normal-mode usage.
-- Improved active-mode visual feedback.
-- Overlay-style label rendering to avoid shifting surrounding text.
-- Label anchoring moved to the next character after matched text, with safe fallback at line end.
-- Flash now preserves visual-mode anchor to allow selection extension on jump.
-- Reduced redundant refresh dispatches by skipping unchanged flash state updates.
-- Added optional dev profiling logs for slow flash recompute cycles.
-- Renamed plugin display name to `Flash Navigator` and simplified command name to `Start jump`.
 
 ### Fixed
 
-- Prevented CM6 re-entrant update dispatch errors.
-- Fixed decoration ordering errors in range builder.
-- Fixed numeric pattern input handling while flash mode is active.
-- Fixed label visual placement/alignment issues across themes.
+- Initial stability fixes for update-loop and decoration ordering edge cases.
