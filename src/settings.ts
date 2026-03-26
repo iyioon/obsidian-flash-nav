@@ -5,6 +5,8 @@ export interface FlashNavSettings {
   labelAlphabet: string;
   labelReuseMode: "none" | "lowercase" | "all";
   labelCurrentMatch: boolean;
+  labelBackgroundColor: string;
+  currentLabelBackgroundColor: string;
   searchDirection: "closest" | "forward" | "backward";
   searchScope: "viewport" | "line" | "document";
   caseSensitive: boolean;
@@ -17,6 +19,8 @@ export const DEFAULT_SETTINGS: FlashNavSettings = {
   labelAlphabet: "asdfghjklqwertyuiopzxcvbnm",
   labelReuseMode: "lowercase",
   labelCurrentMatch: true,
+  labelBackgroundColor: "#3b82f6",
+  currentLabelBackgroundColor: "#ef4444",
   searchDirection: "closest",
   searchScope: "viewport",
   caseSensitive: false,
@@ -54,6 +58,18 @@ export function normalizeSettings(raw: unknown): FlashNavSettings {
     merged.labelReuseMode = DEFAULT_SETTINGS.labelReuseMode;
   }
   merged.labelCurrentMatch = Boolean(merged.labelCurrentMatch);
+  const isHexColor = (value: unknown): value is string => {
+    if (typeof value !== "string") {
+      return false;
+    }
+    return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(value.trim());
+  };
+  if (!isHexColor(merged.labelBackgroundColor)) {
+    merged.labelBackgroundColor = DEFAULT_SETTINGS.labelBackgroundColor;
+  }
+  if (!isHexColor(merged.currentLabelBackgroundColor)) {
+    merged.currentLabelBackgroundColor = DEFAULT_SETTINGS.currentLabelBackgroundColor;
+  }
   if (!["closest", "forward", "backward"].includes(String(merged.searchDirection))) {
     merged.searchDirection = DEFAULT_SETTINGS.searchDirection;
   }
@@ -66,6 +82,21 @@ export function normalizeSettings(raw: unknown): FlashNavSettings {
 }
 
 export class FlashNavSettingTab extends PluginSettingTab {
+  private resolveAccentColor(): string {
+    const raw = getComputedStyle(document.body).getPropertyValue("--text-accent").trim();
+    if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(raw)) {
+      return raw;
+    }
+
+    const rgb = raw.match(/rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+    if (rgb) {
+      const toHex = (n: string) => Number(n).toString(16).padStart(2, "0");
+      return `#${toHex(rgb[1] ?? "0")}${toHex(rgb[2] ?? "0")}${toHex(rgb[3] ?? "0")}`;
+    }
+
+    return "#3b82f6";
+  }
+
   constructor(app: App, private readonly plugin: ObsidianFlashNavPlugin) {
     super(app, plugin);
   }
@@ -73,6 +104,7 @@ export class FlashNavSettingTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
+    const accentColor = this.resolveAccentColor();
 
     new Setting(containerEl).setName("Flash nav").setHeading();
 
@@ -110,6 +142,42 @@ export class FlashNavSettingTab extends PluginSettingTab {
         toggle.setValue(this.plugin.settings.labelCurrentMatch).onChange(async (value) => {
           await this.plugin.updateSettings({ labelCurrentMatch: value });
         });
+      });
+
+    new Setting(containerEl)
+      .setName("Label color")
+      .setDesc("Background color for regular jump labels.")
+      .addColorPicker((picker) => {
+        picker.setValue(this.plugin.settings.labelBackgroundColor || accentColor).onChange(async (value) => {
+          await this.plugin.updateSettings({ labelBackgroundColor: value });
+        });
+      })
+      .addButton((button) => {
+        button
+          .setButtonText("Reset")
+          .setTooltip("Reset to Obsidian accent color")
+          .onClick(async () => {
+            await this.plugin.updateSettings({ labelBackgroundColor: accentColor });
+            this.display();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName("Current label color")
+      .setDesc("Background color for the active label jumped by Enter.")
+      .addColorPicker((picker) => {
+        picker.setValue(this.plugin.settings.currentLabelBackgroundColor || accentColor).onChange(async (value) => {
+          await this.plugin.updateSettings({ currentLabelBackgroundColor: value });
+        });
+      })
+      .addButton((button) => {
+        button
+          .setButtonText("Reset")
+          .setTooltip("Reset to Obsidian accent color")
+          .onClick(async () => {
+            await this.plugin.updateSettings({ currentLabelBackgroundColor: accentColor });
+            this.display();
+          });
       });
 
     new Setting(containerEl)

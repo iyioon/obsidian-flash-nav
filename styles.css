@@ -13,14 +13,18 @@
   position: relative;
 }
 
-.cm-editor.flash-nav-active::before {
+.cm-editor.flash-nav-active .cm-content {
+  position: relative;
+}
+
+.cm-editor.flash-nav-active .cm-content::before {
   content: "";
   position: absolute;
   inset: 0;
   background: var(--background-primary);
   opacity: var(--flash-nav-backdrop-opacity, 0.52);
   pointer-events: none;
-  z-index: 2;
+  z-index: 1;
 }
 
 .workspace-leaf-content.flash-nav-leaf-active .view-header-title::after {
@@ -50,11 +54,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  width: 1.35ch;
   height: 100%;
   padding: 0;
   border-radius: 4px;
-  background: var(--text-accent);
+  background: var(--flash-nav-label-bg, var(--text-accent));
   color: var(--text-on-accent);
   font-weight: 700;
   font-size: 1em;
@@ -65,5 +69,12 @@
 }
 
 .flash-nav-label-slot-current::after {
-  outline: 1px solid var(--text-normal);
+  background: var(--flash-nav-label-current-bg, #ef4444);
+}
+
+.cm-editor.flash-nav-active .flash-nav-match,
+.cm-editor.flash-nav-active .flash-nav-match-current,
+.cm-editor.flash-nav-active .flash-nav-label-slot,
+.cm-editor.flash-nav-active .flash-nav-label-slot::after {
+  opacity: 1 !important;
 }

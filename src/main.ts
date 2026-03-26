@@ -37,6 +37,14 @@ export default class ObsidianFlashNavPlugin extends Plugin {
       "--flash-nav-backdrop-opacity",
       `${Math.max(0, Math.min(90, this.settings.backdropOpacity)) / 100}`
     );
+    document.documentElement.style.setProperty(
+      "--flash-nav-label-bg",
+      this.settings.labelBackgroundColor
+    );
+    document.documentElement.style.setProperty(
+      "--flash-nav-label-current-bg",
+      this.settings.currentLabelBackgroundColor
+    );
   }
 
   async updateSettings(next: Partial<FlashNavSettings>): Promise<void> {
@@ -91,5 +99,7 @@ export default class ObsidianFlashNavPlugin extends Plugin {
 
   onunload(): void {
     document.documentElement.style.removeProperty("--flash-nav-backdrop-opacity");
+    document.documentElement.style.removeProperty("--flash-nav-label-bg");
+    document.documentElement.style.removeProperty("--flash-nav-label-current-bg");
   }
 }

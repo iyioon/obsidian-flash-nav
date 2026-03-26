@@ -20,6 +20,7 @@ Fast flow:
   - label alphabet
   - label reuse mode (none/lowercase/all)
   - label current match toggle
+  - label color and current label color (with reset to current accent)
   - search direction (closest/forward/backward)
   - search scope (viewport/current line/document)
   - case sensitive and smart-case matching

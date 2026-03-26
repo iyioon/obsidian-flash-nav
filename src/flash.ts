@@ -12,6 +12,8 @@ let activeSettings: FlashNavSettings = {
   labelAlphabet: "asdfghjklqwertyuiopzxcvbnm",
   labelReuseMode: "lowercase",
   labelCurrentMatch: true,
+  labelBackgroundColor: "#3b82f6",
+  currentLabelBackgroundColor: "#ef4444",
   searchDirection: "closest",
   searchScope: "viewport",
   caseSensitive: false,

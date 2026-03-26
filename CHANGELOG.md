@@ -8,6 +8,11 @@ All notable changes to this project will be documented in this file.
 
 - Fixed flash backdrop overlay behavior while scrolling so dimming remains consistent for headings and regular text.
 
+### Added
+
+- Added settings for regular label color and active/current label color.
+- Added reset buttons for label colors to restore Obsidian accent color behavior.
+
 ## [0.2.1] - 2026-03-19
 
 ### Changed
