@@ -164,7 +164,7 @@ export class FlashNavSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Current label color")
-      .setDesc("Background color for the active label jumped by Enter.")
+      .setDesc("Background color for the active label jumped by enter.")
       .addColorPicker((picker) => {
         picker.setValue(this.plugin.settings.currentLabelBackgroundColor || accentColor).onChange(async (value) => {
           await this.plugin.updateSettings({ currentLabelBackgroundColor: value });
