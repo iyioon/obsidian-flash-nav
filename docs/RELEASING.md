@@ -36,7 +36,7 @@ Before a commit, push, PR, About update, tag, release, or issue comment/closure,
 After approval:
 
 1. Recheck live `main` and the proposed tag to avoid overwriting new work.
-2. Commit the reviewed files with the maintainer's verified identity and push the approved branch. If using a PR, wait for checks and merge only as approved; never rewrite existing history.
+2. Commit the reviewed files with your verified Git identity and push the approved branch. If using a PR, wait for checks and merge only as approved; never rewrite existing history.
 3. Confirm the release commit is on default branch `main` and that CI passed.
 4. Create a tag pointing to that exact commit and push only that tag. **Pushing it triggers publication.**
 5. Monitor the Release workflow and verify its outcome.
@@ -56,4 +56,4 @@ Release notes come from `docs/releases/<version>.md`; missing or empty assets fa
 
 Verify the published tag's commit, release version, asset names/sizes/checksums, attached manifest, default-branch manifest, and compatibility history. Check the public Community listing and its review/update status. If it cannot be checked without signing into the developer dashboard, report that result as pending.
 
-Ask the maintainer to check for the update in Obsidian if app validation is not available. Never infer an installed app result from GitHub assets alone. After release confirmation, carry out only the separately approved recoverable cleanup; keep source, tests, documentation, Git history, and required release assets.
+Check for the update in Obsidian when app access is available. After release confirmation, carry out only the separately approved recoverable cleanup; keep source, tests, documentation, Git history, and required release assets.

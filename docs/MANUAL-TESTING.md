@@ -1,12 +1,8 @@
 # Manual Obsidian validation for issue #9
 
-Status: **full checklist pending**. A prior candidate received user confirmation
-in Obsidian, but app/plugin versions and per-case results were not recorded.
-The final 0.2.4 candidate needs a fresh check, including immediate visual Ex
-range commands after a jump. Automated tests exercise upstream CodeMirror Vim
-6.3.0 with CodeMirror state 6.5.0/view 6.38.6 under jsdom. They cover Ex-operation
-handoff and selection semantics, but do not validate Obsidian's bundled adapter,
-the command bridge, keyboard capture, layout, or actual scrolling.
+Use this checklist when testing changes to Vim selection behavior in Obsidian.
+It covers the command bridge, keyboard capture, selection ranges, and scrolling
+alongside the automated regression tests.
 
 ## Setup and evidence
 
