@@ -5,6 +5,7 @@ import {
   ViewPlugin,
   type ViewUpdate
 } from "@codemirror/view";
+import { jumpVisual, VisualHandoff, type VisualContext, type VimAdapter } from "./flash-selection";
 import type { FlashNavSettings } from "./settings";
 import { applyLabelPlacementCore, assignLabelsCore, findMatchesCore } from "./flash-core";
 
@@ -23,12 +24,18 @@ let activeSettings: FlashNavSettings = {
 };
 
 const reusedLabelsByPos = new Map<number, string>();
-const recentVisualSelectionByView = new WeakMap<EditorView, {
-  anchor: number;
-  head: number;
-  ts: number;
-}>();
-const VISUAL_SELECTION_REUSE_MS = 1500;
+const visualHandoffByView = new WeakMap<EditorView, VisualHandoff>();
+function visualHandoff(view: EditorView): VisualHandoff {
+  let handoff = visualHandoffByView.get(view);
+  if (!handoff) {
+    handoff = new VisualHandoff();
+    visualHandoffByView.set(view, handoff);
+  }
+  return handoff;
+}
+function vimAdapter(view: EditorView): VimAdapter | undefined {
+  return (view as EditorView & { cm?: VimAdapter }).cm;
+}
 const PROFILE_LOG_THRESHOLD_MS = 8;
 
 type FlashMatch = {
@@ -45,6 +52,7 @@ type FlashState = {
   matches: FlashMatch[];
   targetIndex: number;
   visualAnchor: number | null;
+  vimVisual: VisualContext | null;
 };
 
 const INACTIVE_STATE: FlashState = {
@@ -52,7 +60,8 @@ const INACTIVE_STATE: FlashState = {
   pattern: "",
   matches: [],
   targetIndex: -1,
-  visualAnchor: null
+  visualAnchor: null,
+  vimVisual: null
 };
 
 type ReplaceStatePayload = {
@@ -70,7 +79,7 @@ type ProfileEvent = {
   direction: FlashNavSettings["searchDirection"];
 };
 
-const startFlashEffect = StateEffect.define<{ visualAnchor: number | null }>();
+const startFlashEffect = StateEffect.define<{ visualAnchor: number | null; vimVisual: VisualContext | null }>();
 const stopFlashEffect = StateEffect.define<void>();
 const replaceFlashStateEffect = StateEffect.define<ReplaceStatePayload>();
 
@@ -108,7 +117,8 @@ const flashStateField = StateField.define<FlashState>({
           pattern: "",
           matches: [],
           targetIndex: -1,
-          visualAnchor: effect.value.visualAnchor
+          visualAnchor: effect.value.visualAnchor,
+          vimVisual: effect.value.vimVisual
         };
       } else if (effect.is(stopFlashEffect)) {
         reusedLabelsByPos.clear();
@@ -119,7 +129,8 @@ const flashStateField = StateField.define<FlashState>({
           pattern: effect.value.pattern,
           matches: effect.value.matches,
           targetIndex: effect.value.targetIndex,
-          visualAnchor: value.visualAnchor
+          visualAnchor: value.visualAnchor,
+          vimVisual: value.vimVisual
         };
       }
     }
@@ -274,6 +285,13 @@ function refreshState(view: EditorView, pattern: string): void {
 }
 
 function jumpToMatch(view: EditorView, match: FlashMatch, visualAnchor: number | null): void {
+  const context = view.state.field(flashStateField).vimVisual;
+  const cm = vimAdapter(view);
+  if (context && cm?.state.vim) {
+    jumpVisual(cm, context, match.from);
+    view.dispatch({ effects: stopFlashEffect.of(undefined), scrollIntoView: true });
+    return;
+  }
   const selection = (() => {
     if (visualAnchor === null) {
       return { anchor: match.from };
@@ -441,14 +459,9 @@ const flashViewPlugin = ViewPlugin.fromClass(
       this.syncActiveClass();
 
       if (update.selectionSet) {
-        const main = update.state.selection.main;
-        if (!main.empty) {
-          recentVisualSelectionByView.set(this.view, {
-            anchor: main.anchor,
-            head: main.head,
-            ts: Date.now()
-          });
-        }
+        visualHandoff(this.view).selectionChanged(
+          vimAdapter(this.view), update.state.selection.main.empty
+        );
       }
 
       if (!state.active) {
@@ -478,24 +491,15 @@ export function startFlash(view: EditorView): void {
   view.focus();
 
   const range = view.state.selection.main;
-  let visualAnchor = range.empty ? null : range.anchor;
-
-  if (visualAnchor === null) {
-    const recent = recentVisualSelectionByView.get(view);
-    if (recent) {
-      const now = Date.now();
-      const isFresh = now - recent.ts <= VISUAL_SELECTION_REUSE_MS;
-      const cursor = range.head;
-      const isRelated = cursor === recent.anchor || cursor === recent.head;
-      if (isFresh && isRelated) {
-        visualAnchor = recent.anchor;
-      }
-    }
-  }
+  const cm = vimAdapter(view);
+  const vimVisual = visualHandoff(view).take(cm);
+  const visualAnchor = vimVisual && cm
+    ? cm.indexFromPos(vimVisual.anchor)
+    : range.empty ? null : range.anchor;
 
   const state = view.state.field(flashStateField);
   if (!state.active) {
-    view.dispatch({ effects: startFlashEffect.of({ visualAnchor }) });
+    view.dispatch({ effects: startFlashEffect.of({ visualAnchor, vimVisual }) });
   }
   refreshState(view, "");
 }

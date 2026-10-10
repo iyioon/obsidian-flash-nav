@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.4] - 2026-10-10
+
+### Fixed
+
+- Preserve Vim's visual anchor and characterwise, linewise, or blockwise mode when a Flash jump is invoked through an Ex mapping such as `vmap s :flash<CR>` (#9).
+- Replace the timed selection cache with a handoff scoped to the current Vim operation, preventing normal-mode jumps from reusing an earlier visual selection.
+- Refresh Vim's visual range marks after a jump so an immediate Ex range command uses the new selection.
+
+### Changed
+
+- Add CodeMirror/Vim integration regressions alongside selection unit tests, and type-check and lint test files.
+- Run lint in CI and release validation.
+
 ## [0.2.3] - 2026-03-19
 
 ### Added

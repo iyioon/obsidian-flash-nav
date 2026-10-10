@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { applyLabelPlacementCore, assignLabelsCore, findMatchesCore } from "../src/flash-core";
 
-test("findMatchesCore respects line scope", () => {
+void test("findMatchesCore respects line scope", () => {
   const doc = "alpha beta\nalpha gamma\nalpha";
   const cursorPos = doc.indexOf("gamma");
   const matches = findMatchesCore({
@@ -20,7 +20,7 @@ test("findMatchesCore respects line scope", () => {
   assert.equal(matches[0]?.from, doc.indexOf("alpha", doc.indexOf("\n") + 1));
 });
 
-test("findMatchesCore respects forward direction", () => {
+void test("findMatchesCore respects forward direction", () => {
   const doc = "one two one two one";
   const cursorPos = doc.indexOf("two");
   const matches = findMatchesCore({
@@ -38,7 +38,7 @@ test("findMatchesCore respects forward direction", () => {
   assert.ok(matches.every((m) => m.from >= cursorPos));
 });
 
-test("findMatchesCore respects backward direction", () => {
+void test("findMatchesCore respects backward direction", () => {
   const doc = "one two one two one";
   const cursorPos = doc.lastIndexOf("two");
   const matches = findMatchesCore({
@@ -56,7 +56,7 @@ test("findMatchesCore respects backward direction", () => {
   assert.ok(matches.every((m) => m.from <= cursorPos));
 });
 
-test("findMatchesCore respects viewport ranges", () => {
+void test("findMatchesCore respects viewport ranges", () => {
   const doc = "alpha beta gamma alpha delta alpha";
   const firstAlpha = doc.indexOf("alpha");
   const secondAlpha = doc.indexOf("alpha", firstAlpha + 1);
@@ -79,7 +79,7 @@ test("findMatchesCore respects viewport ranges", () => {
   assert.deepEqual(matches.map((m) => m.from), [firstAlpha, thirdAlpha]);
 });
 
-test("findMatchesCore case sensitivity matrix", () => {
+void test("findMatchesCore case sensitivity matrix", () => {
   const doc = "Alpha alpha ALPHA";
 
   const strict = findMatchesCore({
@@ -119,7 +119,7 @@ test("findMatchesCore case sensitivity matrix", () => {
   assert.equal(insensitive.length, 3);
 });
 
-test("findMatchesCore supports numeric pattern", () => {
+void test("findMatchesCore supports numeric pattern", () => {
   const doc = "a1 b2 c2 d3";
   const matches = findMatchesCore({
     doc,
@@ -135,7 +135,7 @@ test("findMatchesCore supports numeric pattern", () => {
   assert.equal(matches.length, 2);
 });
 
-test("assignLabelsCore reuses lowercase labels in lowercase mode", () => {
+void test("assignLabelsCore reuses lowercase labels in lowercase mode", () => {
   const doc = "alpha beta alpha";
   const matches = [
     { from: 0, to: 5 },
@@ -158,7 +158,7 @@ test("assignLabelsCore reuses lowercase labels in lowercase mode", () => {
   assert.equal(reusedMatch?.label, "s");
 });
 
-test("assignLabelsCore can hide current match label", () => {
+void test("assignLabelsCore can hide current match label", () => {
   const doc = "alpha beta gamma";
   const matches = [
     { from: 0, to: 5 },
@@ -180,7 +180,7 @@ test("assignLabelsCore can hide current match label", () => {
   assert.equal(labeled[1]?.label, "a");
 });
 
-test("assignLabelsCore respects reuse mode none/all", () => {
+void test("assignLabelsCore respects reuse mode none/all", () => {
   const doc = "alpha beta alpha";
   const matches = [
     { from: 0, to: 5 },
@@ -214,7 +214,7 @@ test("assignLabelsCore respects reuse mode none/all", () => {
   assert.equal(allLabeled.find((m) => m.from === 11)?.label, "Q");
 });
 
-test("assignLabelsCore ignores stale reuse labels and falls back safely", () => {
+void test("assignLabelsCore ignores stale reuse labels and falls back safely", () => {
   const doc = "alpha beta alpha";
   const matches = [
     { from: 0, to: 5 },
@@ -237,7 +237,7 @@ test("assignLabelsCore ignores stale reuse labels and falls back safely", () => 
   assert.ok(labeled.every((m) => m.label === undefined || "asdf".includes(m.label)));
 });
 
-test("assignLabelsCore continuation skip falls back when all labels filtered", () => {
+void test("assignLabelsCore continuation skip falls back when all labels filtered", () => {
   const doc = "ab aa";
   const matches = [
     { from: 0, to: 1 },
@@ -258,7 +258,7 @@ test("assignLabelsCore continuation skip falls back when all labels filtered", (
   assert.equal(labeled[0]?.label, "a");
 });
 
-test("applyLabelPlacementCore anchors next character then falls back at line end", () => {
+void test("applyLabelPlacementCore anchors next character then falls back at line end", () => {
   const doc = "abx\ncd";
   const placed = applyLabelPlacementCore(doc, [
     { from: 0, to: 2, label: "a" },

@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "*"
+      - "[0-9]*.[0-9]*.[0-9]*"
   workflow_dispatch:
 
 permissions:
@@ -29,23 +29,30 @@ jobs:
       - name: Test
         run: npm run test
 
+      - name: Lint
+        run: npm run lint
+
       - name: Build
         run: npm run build
 
-      - name: Validate tag matches manifest version
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Validate release metadata and assets
+        env:
+          RELEASE_TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+        run: npm run validate:release
+
+      - name: Locate reviewed release notes
+        id: notes
         run: |
-          TAG="${GITHUB_REF#refs/tags/}"
           VERSION=$(node -p "require('./manifest.json').version")
-          if [ "$TAG" != "$VERSION" ]; then
-            echo "Tag '$TAG' does not match manifest version '$VERSION'"
-            exit 1
-          fi
+          echo "path=docs/releases/$VERSION.md" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          name: Flash Navigator ${{ github.ref_name }}
+          body_path: ${{ steps.notes.outputs.path }}
+          fail_on_unmatched_files: true
           files: |
             main.js
             manifest.json

@@ -5,3 +5,10 @@ main.js
 .DS_Store
 AGENTS.md
 data.json
+
+# Local recovery, release preparation, and recoverable cleanup
+/.recovery-local/
+/.release-prep/
+/.release-backups/
+/.release-quarantine/
+/flash-nav-complete-source-recovery.zip

@@ -4,14 +4,7 @@ Thanks for considering a contribution.
 
 ## Development setup
 
-1. Clone the repo.
-2. Run `npm install`.
-3. Run `npm run dev`.
-4. Load plugin from your dev vault at `.obsidian/plugins/flash-navigator/`.
-
-Reference:
-
-- https://docs.obsidian.md/Plugins/Getting+started/Build+a+plugin
+See [Development](docs/DEVELOPMENT.md) for Node 20 setup, dependency installation, build and test commands, loading the plugin in a development vault, and profiling.
 
 ## PR expectations
 
@@ -19,7 +12,8 @@ Reference:
 - Keep scope focused to one feature/fix.
 - Include manual test notes (mode, viewport size, Vim mapping state).
 - Update docs when behavior changes.
-- Ensure CI build passes (`npm run build`).
+- Run tests, lint, type checks, and the production build as described in [Development](docs/DEVELOPMENT.md).
+- For release preparation, follow the [release process](docs/RELEASING.md) and record remaining manual checks.
 
 ## Coding notes
 
